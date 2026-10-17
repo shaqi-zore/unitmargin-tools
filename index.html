@@ -1,604 +1,107 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Enterprise Unit Economics & Batch Matrix | UnitMargin Lab</title>
+  <title>UnitMargin Lab | Clear E-Commerce Unit Economics & Profit Engine</title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <!-- SheetJS CDN for parsing & generating XLSX / CSV files directly in browser -->
   <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
   <style>
     input::-webkit-outer-spin-button, input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
   </style>
 </head>
-<body class="bg-slate-900 text-slate-100 min-h-screen py-6 px-3 sm:px-6 font-sans">
-  <div class="max-w-7xl mx-auto space-y-5">
+<body class="bg-slate-900 text-slate-100 min-h-screen py-5 px-3 sm:px-6 font-sans">
+  <div class="max-w-6xl mx-auto space-y-5">
     
-    <!-- Top Nav / Control Bar (Re-designed with High-Visibility Switchers) -->
-    <header class="bg-slate-800/95 border border-slate-700 p-4 sm:p-5 rounded-2xl shadow-2xl space-y-4">
-      
-      <!-- Top Row: Title, FX & Work Modes -->
-      <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 border-b border-slate-750 pb-4">
+    <!-- Top Nav / Control Center -->
+    <header class="bg-slate-800/95 border border-slate-700 p-4 sm:p-5 rounded-2xl shadow-xl space-y-4">
+      <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-3 border-b border-slate-750 pb-3">
         <div>
-          <div class="flex items-center gap-3">
-            <h1 class="text-xl sm:text-2xl font-black text-white tracking-tight">Enterprise Margin & Creator Lab</h1>
-            <span id="fxStatus" class="text-[10px] text-emerald-400 font-mono bg-emerald-950/70 border border-emerald-700/60 px-2 py-0.5 rounded-full font-bold">● 实时汇率已连接</span>
+          <div class="flex items-center gap-2.5">
+            <h1 class="text-xl sm:text-2xl font-black text-white tracking-tight">UnitMargin Lab</h1>
+            <span id="fxStatus" class="text-[10px] text-emerald-400 font-mono bg-emerald-950/60 border border-emerald-800 px-2 py-0.5 rounded-full font-bold">● Live FX Active</span>
           </div>
-          <p class="text-xs text-slate-400 mt-1">跨境卖家全链路成本核算：达人佣金、仓储配送、分仓配置、VAT及投流保本ROAS</p>
+          <p id="i18n-subhead" class="text-xs text-slate-400 mt-0.5">The straightforward profit & breakeven tool for Amazon & TikTok Shop sellers.</p>
         </div>
 
-        <!-- Mode Switcher -->
-        <div class="bg-slate-900 border border-slate-700 p-1.5 rounded-xl flex items-center gap-1.5 self-stretch md:self-auto justify-center">
-          <button id="btnModeBatch" class="px-4 py-2 rounded-lg text-xs font-bold bg-sky-600 text-white shadow-md transition-all flex items-center gap-1.5">
-            <span>📑 批量矩阵 (Excel导入)</span>
+        <div class="flex flex-wrap items-center gap-2">
+          <!-- User Guide Button -->
+          <button id="btnOpenGuide" class="px-3 py-1.5 rounded-lg text-xs font-bold bg-slate-750 hover:bg-slate-700 text-amber-300 border border-amber-500/30 flex items-center gap-1.5 transition">
+            <span>📖</span><span id="i18n-btnGuide">User Guide & Rules</span>
           </button>
-          <button id="btnModeSingle" class="px-4 py-2 rounded-lg text-xs font-bold text-slate-400 hover:text-white hover:bg-slate-800 transition-all flex items-center gap-1.5">
-            <span>🎯 单品深度精算</span>
-          </button>
+
+          <!-- View Switcher -->
+          <div class="bg-slate-900 border border-slate-700 p-1 rounded-xl flex items-center gap-1">
+            <button id="btnTabSingle" class="px-3 py-1.5 rounded-lg text-xs font-bold bg-sky-600 text-white shadow transition-all">🎯 Calculator</button>
+            <button id="btnTabBatch" class="px-3 py-1.5 rounded-lg text-xs font-bold text-slate-400 hover:text-white transition-all">📑 Batch Excel</button>
+          </div>
+
+          <!-- Language Switcher -->
+          <select id="selLang" class="bg-slate-900 border border-slate-700 text-white text-xs font-medium rounded-lg px-2.5 py-1.5 focus:outline-none focus:border-sky-500">
+            <option value="en" selected>English</option>
+            <option value="zh">中文 (简体)</option>
+            <option value="de">Deutsch</option>
+          </select>
         </div>
       </div>
 
-      <!-- Prominent Switcher Row: Platform & Regional Marketplace -->
-      <div class="grid grid-cols-1 md:grid-cols-12 gap-3 pt-1">
-        
-        <!-- Platform Switcher (5 Cols) -->
-        <div class="md:col-span-5 bg-slate-900/90 border border-slate-700/80 p-3 rounded-xl flex flex-col justify-between gap-2 shadow-inner">
-          <div class="flex justify-between items-center">
-            <span class="text-[11px] font-black uppercase tracking-wider text-sky-400 flex items-center gap-1">
-              <span>⚡</span> 1. 选择销售平台 (PLATFORM)
-            </span>
-            <span id="txtActivePlatBadge" class="text-[10px] text-slate-400 font-mono">当前: TikTok Shop</span>
+      <!-- Marketplace & Platform Big Switchers -->
+      <div class="grid grid-cols-1 md:grid-cols-12 gap-3">
+        <!-- Platform Selector -->
+        <div class="md:col-span-5 bg-slate-900/90 border border-slate-750 p-2.5 rounded-xl space-y-1.5">
+          <div class="flex justify-between items-center text-[11px] font-bold text-sky-400">
+            <span id="i18n-step1">1. Choose Platform</span>
+            <span id="txtActivePlatBadge" class="text-[10px] text-slate-400 font-mono">TikTok Shop</span>
           </div>
-          <div class="grid grid-cols-2 gap-2" id="platformSelectorGroup">
-            <button type="button" data-val="TTS" class="btn-plat flex items-center justify-center gap-2 py-2.5 px-3 rounded-lg text-xs font-black border transition-all bg-sky-500/20 border-sky-400 text-sky-200 shadow-sm">
-              <span class="text-base">🎵</span>
-              <span>TikTok Shop</span>
+          <div class="grid grid-cols-2 gap-2" id="groupPlatform">
+            <button type="button" data-val="TTS" class="btn-plat flex items-center justify-center gap-2 py-2 px-3 rounded-lg text-xs font-black border transition-all bg-sky-500/20 border-sky-400 text-sky-200">
+              <span>🎵</span><span>TikTok Shop</span>
             </button>
-            <button type="button" data-val="AMZ" class="btn-plat flex items-center justify-center gap-2 py-2.5 px-3 rounded-lg text-xs font-bold border border-slate-750 bg-slate-800 text-slate-300 hover:text-white hover:border-slate-600 transition-all">
-              <span class="text-base">📦</span>
-              <span>Amazon FBA</span>
+            <button type="button" data-val="AMZ" class="btn-plat flex items-center justify-center gap-2 py-2 px-3 rounded-lg text-xs font-bold border border-slate-700 bg-slate-800 text-slate-300 hover:text-white">
+              <span>📦</span><span>Amazon FBA</span>
             </button>
           </div>
         </div>
 
-        <!-- Regional Market Switcher (7 Cols) -->
-        <div class="md:col-span-7 bg-slate-900/90 border border-slate-700/80 p-3 rounded-xl flex flex-col justify-between gap-2 shadow-inner">
-          <div class="flex justify-between items-center">
-            <span class="text-[11px] font-black uppercase tracking-wider text-amber-400 flex items-center gap-1">
-              <span>🌐</span> 2. 选择国家站点与货币 (MARKETPLACE)
-            </span>
-            <span id="fxRateDisplay" class="text-[10px] text-emerald-400 font-mono font-semibold">1 USD ≈ 7.25 CNY</span>
+        <!-- Region Selector -->
+        <div class="md:col-span-7 bg-slate-900/90 border border-slate-750 p-2.5 rounded-xl space-y-1.5">
+          <div class="flex justify-between items-center text-[11px] font-bold text-amber-400">
+            <span id="i18n-step2">2. Choose Marketplace</span>
+            <span id="fxRateDisplay" class="text-[10px] text-emerald-400 font-mono">1 USD ≈ 7.25 CNY</span>
           </div>
-          <div class="grid grid-cols-3 gap-2" id="regionSelectorGroup">
-            <button type="button" data-val="US" class="btn-region flex items-center justify-center gap-1.5 py-2.5 px-2 rounded-lg text-xs font-black border transition-all bg-amber-500/20 border-amber-400 text-amber-200 shadow-sm">
-              <span class="text-base">🇺🇸</span>
-              <span>美区 (USD)</span>
+          <div class="grid grid-cols-3 gap-2" id="groupRegion">
+            <button type="button" data-val="US" class="btn-region flex items-center justify-center gap-1.5 py-2 px-2 rounded-lg text-xs font-black border transition-all bg-amber-500/20 border-amber-400 text-amber-200">
+              <span>🇺🇸</span><span>US (USD)</span>
             </button>
-            <button type="button" data-val="EU" class="btn-region flex items-center justify-center gap-1.5 py-2.5 px-2 rounded-lg text-xs font-bold border border-slate-750 bg-slate-800 text-slate-300 hover:text-white hover:border-slate-600 transition-all">
-              <span class="text-base">🇪🇺</span>
-              <span>欧区 (EUR)</span>
+            <button type="button" data-val="EU" class="btn-region flex items-center justify-center gap-1.5 py-2 px-2 rounded-lg text-xs font-bold border border-slate-700 bg-slate-800 text-slate-300 hover:text-white">
+              <span>🇪🇺</span><span>EU (EUR)</span>
             </button>
-            <button type="button" data-val="UK" class="btn-region flex items-center justify-center gap-1.5 py-2.5 px-2 rounded-lg text-xs font-bold border border-slate-750 bg-slate-800 text-slate-300 hover:text-white hover:border-slate-600 transition-all">
-              <span class="text-base">🇬🇧</span>
-              <span>英区 (GBP)</span>
+            <button type="button" data-val="UK" class="btn-region flex items-center justify-center gap-1.5 py-2 px-2 rounded-lg text-xs font-bold border border-slate-700 bg-slate-800 text-slate-300 hover:text-white">
+              <span>🇬🇧</span><span>UK (GBP)</span>
             </button>
           </div>
         </div>
-
       </div>
     </header>
 
-    <!-- VIEW 1: BATCH MATRIX & EXCEL UPLOADER -->
-    <main id="viewBatch" class="space-y-4">
-      <div class="bg-slate-800 border border-slate-700 rounded-2xl p-5 shadow-xl space-y-4">
-        
-        <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 border-b border-slate-750 pb-4">
-          <div>
-            <h2 class="text-base font-bold text-white flex items-center gap-2">
-              <span>📊 多产品批量测算工作台</span>
-              <span id="batchMarketBadge" class="text-[11px] bg-slate-900 border border-slate-750 text-slate-300 px-2 py-0.5 rounded font-mono font-normal">TikTok Shop · 美区 (USD)</span>
-            </h2>
-            <p class="text-xs text-slate-400 mt-1">直接上传填好的成本表或在线编辑，数据随平台站点切换即刻同步最新税费逻辑。</p>
-          </div>
-          
-          <div class="flex flex-wrap items-center gap-2">
-            <input type="file" id="excelFileInput" accept=".xlsx, .xls, .csv" class="hidden" />
-            <button id="btnTriggerUpload" class="px-3.5 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg text-xs font-bold flex items-center gap-1.5 shadow transition">
-              <span>📤 上传 Excel / CSV 自动计算</span>
-            </button>
-            <button id="btnDownloadTemplate" class="px-3.5 py-2 bg-slate-700 hover:bg-slate-600 text-white rounded-lg text-xs font-semibold flex items-center gap-1.5 transition">
-              <span>📥 下载标准模板</span>
-            </button>
-            <button id="btnExportCsv" class="px-3.5 py-2 bg-sky-600 hover:bg-sky-500 text-white rounded-lg text-xs font-bold transition">
-              <span>📊 导出计算结果报表</span>
-            </button>
-          </div>
+    <!-- WORKBENCH 1: SINGLE SKU -->
+    <main id="viewSingle" class="space-y-4">
+      <div class="bg-slate-800/80 border border-slate-700 px-4 py-2.5 rounded-xl flex justify-between items-center">
+        <div class="flex items-center gap-2">
+          <span class="text-xs font-bold text-white" id="i18n-viewModeLabel">Calculator Mode:</span>
+          <span id="badgeCurrentMode" class="text-[10px] bg-emerald-950 text-emerald-300 border border-emerald-700 px-2 py-0.5 rounded font-mono font-bold">Simple Mode (Beginner Friendly)</span>
         </div>
-
-        <!-- Summary Metric Row -->
-        <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
-          <div class="bg-slate-900 p-3.5 rounded-xl border border-slate-750">
-            <span class="text-[11px] text-slate-400">总预估出货量</span>
-            <p id="batchTotalUnits" class="text-xl font-black text-white mt-0.5">0</p>
-          </div>
-          <div class="bg-slate-900 p-3.5 rounded-xl border border-slate-750">
-            <span class="text-[11px] text-slate-400">总预估销售额</span>
-            <p id="batchTotalRevenue" class="text-xl font-black text-sky-400 mt-0.5">$0.00</p>
-          </div>
-          <div class="bg-slate-900 p-3.5 rounded-xl border border-slate-750">
-            <span class="text-[11px] text-slate-400">总采购成本支出 (折算)</span>
-            <p id="batchTotalCogs" class="text-xl font-black text-amber-400 mt-0.5">\$0.00</p>
-          </div>
-          <div class="bg-slate-900 p-3.5 rounded-xl border border-slate-750">
-            <span class="text-[11px] text-slate-400">总预估纯利润</span>
-            <p id="batchTotalNetProfit" class="text-xl font-black text-emerald-400 mt-0.5">\$0.00</p>
-          </div>
-        </div>
-
-        <!-- Dynamic Results Table -->
-        <div class="overflow-x-auto">
-          <table class="w-full text-left text-xs text-slate-300">
-            <thead class="bg-slate-900/90 text-[11px] text-slate-400 uppercase tracking-wider border-b border-slate-700">
-              <tr>
-                <th class="py-3 px-2">SKU / 品名</th>
-                <th class="py-3 px-2">数量</th>
-                <th class="py-3 px-2">售价 (<span class="curr-sym">\$</span>)</th>
-                <th class="py-3 px-2">进价 (¥)</th>
-                <th class="py-3 px-2">头程+尾程 (<span class="curr-sym">\$</span>)</th>
-                <th class="py-3 px-2">达人佣金</th>
-                <th class="py-3 px-2">广告 CPA</th>
-                <th class="py-3 px-2">单件纯利</th>
-                <th class="py-3 px-2">纯利率</th>
-                <th class="py-3 px-2">保本 ROAS</th>
-                <th class="py-3 px-2">总纯利润</th>
-                <th class="py-3 px-2 text-center">操作</th>
-              </tr>
-            </thead>
-            <tbody id="batchTableBody" class="divide-y divide-slate-700/80 font-mono">
-              <!-- Injected via JS -->
-            </tbody>
-          </table>
-        </div>
-
-        <div class="pt-2 flex justify-between items-center text-xs text-slate-400">
-          <button id="btnAddRow" class="text-sky-400 hover:text-sky-300 font-bold">+ 手动增加单行产品</button>
-          <span id="batchCountText">当前共 5 个产品</span>
-        </div>
-
+        <button id="btnTogglePro" class="text-xs text-sky-400 hover:text-sky-300 font-semibold underline flex items-center gap-1">
+          <span id="btnToggleProText">Switch to Pro Mode (Show advanced fees) ⚙️</span>
+        </button>
       </div>
-    </main>
 
-    <!-- VIEW 2: SINGLE SKU WORKBENCH -->
-    <main id="viewSingle" class="hidden grid grid-cols-1 lg:grid-cols-12 gap-6">
-      
-      <section class="lg:col-span-7 space-y-4">
-        <!-- 1. Sourcing -->
-        <div class="bg-slate-800 border border-slate-700 rounded-2xl p-4 space-y-3">
-          <div class="flex justify-between items-center border-b border-slate-750 pb-2">
-            <h2 class="text-xs font-bold uppercase tracking-wider text-sky-400">1. 售价与采购折算</h2>
-            <span class="text-[10px] text-slate-400 font-mono">实时外汇即时转化</span>
-          </div>
-          <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
-            <div>
-              <label class="block text-slate-300 mb-1">前台售价 (含税全价)</label>
-              <div class="relative">
-                <span class="curr-sym absolute left-2.5 top-2 text-slate-500">\$</span>
-                <input type="number" id="inpPrice" value="38.00" step="0.01" class="w-full bg-slate-900 border border-slate-700 rounded-lg pl-6 pr-2 py-1.5 text-white font-mono focus:outline-none focus:border-sky-500" />
-              </div>
-            </div>
-            <div>
-              <label class="block text-slate-300 mb-1">采购成本 (¥ RMB)</label>
-              <div class="relative">
-                <span class="absolute left-2.5 top-2 text-slate-500">¥</span>
-                <input type="number" id="inpCogsRmb" value="48.00" step="0.01" class="w-full bg-slate-900 border border-slate-700 rounded-lg pl-6 pr-2 py-1.5 text-white font-mono focus:outline-none focus:border-sky-500" />
-              </div>
-            </div>
-            <div>
-              <label class="block text-slate-300 mb-1">单件头程干线运费</label>
-              <div class="relative">
-                <span class="curr-sym absolute left-2.5 top-2 text-slate-500">\$</span>
-                <input type="number" id="inpFirstLeg" value="2.50" step="0.01" class="w-full bg-slate-900 border border-slate-700 rounded-lg pl-6 pr-2 py-1.5 text-white font-mono focus:outline-none focus:border-sky-500" />
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- 2. Marketing -->
-        <div class="bg-slate-800 border border-amber-500/40 rounded-2xl p-4 space-y-3">
-          <h2 class="text-xs font-bold uppercase tracking-wider text-amber-400 border-b border-slate-750 pb-2">2. 达人带货与广告投流营销</h2>
-          <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
-            <div>
-              <label class="block text-slate-300 mb-1">达人佣金抽点 (%)</label>
-              <input type="number" id="inpCreatorComm" value="15.0" step="0.5" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 text-white font-mono focus:outline-none focus:border-sky-500" />
-            </div>
-            <div>
-              <label class="block text-slate-300 mb-1">一口价/样品平摊/件</label>
-              <div class="relative">
-                <span class="curr-sym absolute left-2.5 top-2 text-slate-500">\$</span>
-                <input type="number" id="inpCreatorFlat" value="1.00" step="0.1" class="w-full bg-slate-900 border border-slate-700 rounded-lg pl-6 pr-2 py-1.5 text-white font-mono focus:outline-none focus:border-sky-500" />
-              </div>
-            </div>
-            <div>
-              <label class="block text-slate-300 mb-1">单单广告成效 (CPA)</label>
-              <div class="relative">
-                <span class="curr-sym absolute left-2.5 top-2 text-slate-500">\$</span>
-                <input type="number" id="inpAdCpa" value="5.00" step="0.1" class="w-full bg-slate-900 border border-slate-700 rounded-lg pl-6 pr-2 py-1.5 text-white font-mono focus:outline-none focus:border-sky-500" />
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- 3. Ops -->
-        <div class="bg-slate-800 border border-slate-700 rounded-2xl p-4 space-y-3">
-          <h2 class="text-xs font-bold uppercase tracking-wider text-sky-400 border-b border-slate-750 pb-2">3. 仓储履约、平台佣金、关税与 VAT</h2>
-          <div class="grid grid-cols-1 sm:grid-cols-4 gap-3 text-xs">
-            <div>
-              <label class="block text-slate-300 mb-1">尾程配送/履约费</label>
-              <input type="number" id="inpFulfillment" value="4.50" step="0.01" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 text-white font-mono focus:outline-none focus:border-sky-500" />
-            </div>
-            <div id="wrapperInbound">
-              <label class="block text-slate-300 mb-1">入库分仓配置费</label>
-              <input type="number" id="inpInbound" value="0.00" step="0.01" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 text-white font-mono focus:outline-none focus:border-sky-500" />
-            </div>
-            <div>
-              <label class="block text-slate-300 mb-1">月仓租均摊/件</label>
-              <input type="number" id="inpStorage" value="0.30" step="0.01" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 text-white font-mono focus:outline-none focus:border-sky-500" />
-            </div>
-            <div>
-              <label class="block text-slate-300 mb-1">关税税率 (%)</label>
-              <input type="number" id="inpTariff" value="7.5" step="0.1" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 text-white font-mono focus:outline-none focus:border-sky-500" />
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <!-- Single Metrics -->
-      <section class="lg:col-span-5 space-y-4">
-        <div class="bg-slate-800 border border-slate-700 rounded-2xl p-5 shadow-xl space-y-4">
-          <h2 class="text-xs font-bold uppercase tracking-wider text-emerald-400 border-b border-slate-750 pb-2">财务决策指标与达人上限</h2>
-          
-          <div class="grid grid-cols-2 gap-3">
-            <div class="bg-slate-900/80 p-3.5 rounded-xl border border-slate-750">
-              <span class="text-[11px] text-slate-400">单件纯利</span>
-              <p id="valNetProfit" class="text-2xl font-black text-emerald-400 mt-0.5">\$0.00</p>
-            </div>
-            <div class="bg-slate-900/80 p-3.5 rounded-xl border border-slate-750">
-              <span class="text-[11px] text-slate-400">综合纯利率</span>
-              <p id="valNetMargin" class="text-2xl font-black text-sky-400 mt-0.5">0.0%</p>
-            </div>
-            <div class="bg-slate-900/80 p-3.5 rounded-xl border border-slate-750">
-              <span class="text-[11px] text-slate-400">投流保本 ROAS</span>
-              <p id="valBreakevenRoas" class="text-xl font-black text-amber-400 mt-0.5">0.00x</p>
-            </div>
-            <div class="bg-slate-900/80 p-3.5 rounded-xl border border-slate-750">
-              <span class="text-[11px] text-slate-400">最高可给达人佣金</span>
-              <p id="valMaxCreatorComm" class="text-xl font-black text-amber-300 mt-0.5">0.0%</p>
-            </div>
-          </div>
-
-          <!-- Ko-fi Link -->
-          <div class="pt-2">
-            <a href="https://ko-fi.com/unitmarginlab" target="_blank" class="block w-full py-2.5 px-4 bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-center rounded-xl text-xs transition duration-150 shadow-md">
-              ☕ Support UnitMargin Lab on Ko-fi
-            </a>
-          </div>
-        </div>
-      </section>
-    </main>
-
-    <footer class="text-center text-[11px] text-slate-500 space-y-1 pt-2">
-      <p>© 2026 UnitMargin Lab. Open unit-economic models for cross-border merchants.</p>
-    </footer>
-  </div>
-
-  <script>
-    // State
-    let currentPlatform = 'TTS';
-    let currentRegion = 'US';
-
-    const fxState = { rates: { USD: 7.25, EUR: 7.82, GBP: 9.15 } };
-    const regionalDefaults = {
-      US: { symbol: '\$', vat: 0, showPlacement: true, amzComm: 15.0, ttsComm: 6.0, tariff: 7.5, name: '美区 (USD)' },
-      EU: { symbol: '€', vat: 19.0, showPlacement: false, amzComm: 15.0, ttsComm: 6.0, tariff: 4.5, name: '欧区 (EUR)' },
-      UK: { symbol: '£', vat: 20.0, showPlacement: false, amzComm: 15.3, ttsComm: 5.0, tariff: 4.0, name: '英区 (GBP)' }
-    };
-
-    let batchProducts = [
-      { name: "Auto_Shaker_650ml", units: 1000, price: 34.99, cogsRmb: 42.0, firstLeg: 2.5, fulfillment: 4.5, inbound: 0.34, storage: 0.3, tariff: 7.5, platComm: 6.0, creatorComm: 15.0, creatorFlat: 1.0, adCpa: 5.0, returnRate: 5.0, vatRate: 0.0 },
-      { name: "Chiikawa_Squishy_Set", units: 2500, price: 19.99, cogsRmb: 18.0, firstLeg: 1.5, fulfillment: 3.8, inbound: 0.0, storage: 0.2, tariff: 0.0, platComm: 6.0, creatorComm: 20.0, creatorFlat: 0.5, adCpa: 3.5, returnRate: 4.0, vatRate: 0.0 },
-      { name: "Tactical_Lure_Bag_7in1", units: 800, price: 49.99, cogsRmb: 68.0, firstLeg: 3.5, fulfillment: 5.8, inbound: 0.34, storage: 0.4, tariff: 7.5, platComm: 6.0, creatorComm: 12.0, creatorFlat: 2.0, adCpa: 8.0, returnRate: 6.0, vatRate: 0.0 },
-      { name: "Cooling_Towel_Set", units: 1500, price: 15.99, cogsRmb: 12.0, firstLeg: 1.2, fulfillment: 3.5, inbound: 0.0, storage: 0.15, tariff: 0.0, platComm: 6.0, creatorComm: 18.0, creatorFlat: 0.5, adCpa: 2.5, returnRate: 3.0, vatRate: 0.0 },
-      { name: "Trailer_D_Ring_Kit", units: 600, price: 29.99, cogsRmb: 32.0, firstLeg: 2.8, fulfillment: 5.2, inbound: 0.34, storage: 0.35, tariff: 7.5, platComm: 15.0, creatorComm: 0.0, creatorFlat: 0.0, adCpa: 6.5, returnRate: 4.0, vatRate: 0.0 }
-    ];
-
-    // High-Visibility Switcher Logic
-    function updateSwitcherUI() {
-      // 1. Update Platform Buttons
-      document.querySelectorAll('.btn-plat').forEach(btn => {
-        const val = btn.getAttribute('data-val');
-        if (val === currentPlatform) {
-          btn.className = "btn-plat flex items-center justify-center gap-2 py-2.5 px-3 rounded-lg text-xs font-black border transition-all bg-sky-500/20 border-sky-400 text-sky-200 shadow-sm";
-        } else {
-          btn.className = "btn-plat flex items-center justify-center gap-2 py-2.5 px-3 rounded-lg text-xs font-bold border border-slate-750 bg-slate-800 text-slate-300 hover:text-white hover:border-slate-600 transition-all";
-        }
-      });
-      document.getElementById('txtActivePlatBadge').innerText = `当前: ${currentPlatform === 'TTS' ? 'TikTok Shop' : 'Amazon FBA'}`;
-
-      // 2. Update Region Buttons
-      document.querySelectorAll('.btn-region').forEach(btn => {
-        const val = btn.getAttribute('data-val');
-        if (val === currentRegion) {
-          btn.className = "btn-region flex items-center justify-center gap-1.5 py-2.5 px-2 rounded-lg text-xs font-black border transition-all bg-amber-500/20 border-amber-400 text-amber-200 shadow-sm";
-        } else {
-          btn.className = "btn-region flex items-center justify-center gap-1.5 py-2.5 px-2 rounded-lg text-xs font-bold border border-slate-750 bg-slate-800 text-slate-300 hover:text-white hover:border-slate-600 transition-all";
-        }
-      });
-
-      // 3. Update Status Badges & Symbols
-      const conf = regionalDefaults[currentRegion];
-      document.getElementById('batchMarketBadge').innerText = `${currentPlatform === 'TTS' ? 'TikTok Shop' : 'Amazon FBA'} · ${conf.name}`;
-      document.querySelectorAll('.curr-sym').forEach(el => el.innerText = conf.symbol);
-
-      const curCode = currentRegion === 'US' ? 'USD' : (currentRegion === 'EU' ? 'EUR' : 'GBP');
-      const rate = fxState.rates[curCode] || 7.25;
-      document.getElementById('fxRateDisplay').innerText = `1 ${curCode} ≈ ${rate.toFixed(2)} CNY`;
-
-      // Update Single View Presets
-      document.getElementById('wrapperInbound').style.display = (conf.showPlacement && currentPlatform === 'AMZ') ? 'block' : 'none';
-      if (currentPlatform === 'AMZ') {
-        document.getElementById('inpFulfillment').value = 5.80;
-        document.getElementById('inpInbound').value = conf.showPlacement ? 0.34 : 0;
-      } else {
-        document.getElementById('inpFulfillment').value = 4.50;
-        document.getElementById('inpInbound').value = 0.00;
-      }
-
-      renderBatchTable();
-      calculateSingle();
-    }
-
-    // Live FX
-    async function initFx() {
-      try {
-        const res = await fetch('https://open.er-api.com/v6/latest/CNY');
-        const data = await res.json();
-        if (data && data.rates) {
-          fxState.rates.USD = 1 / data.rates.USD;
-          fxState.rates.EUR = 1 / data.rates.EUR;
-          fxState.rates.GBP = 1 / data.rates.GBP;
-          document.getElementById('fxStatus').innerText = '● 实时汇率已连接';
-        }
-      } catch (e) {
-        document.getElementById('fxStatus').innerText = '● 预备汇率模式';
-      }
-      updateSwitcherUI();
-    }
-
-    // Render Batch Table
-    function renderBatchTable() {
-      const curSymbol = regionalDefaults[currentRegion].symbol;
-      const curCode = currentRegion === 'US' ? 'USD' : (currentRegion === 'EU' ? 'EUR' : 'GBP');
-      const rate = fxState.rates[curCode] || 7.25;
-
-      const tbody = document.getElementById('batchTableBody');
-      tbody.innerHTML = '';
-
-      let totalUnits = 0, totalRev = 0, totalCogs = 0, totalNet = 0;
-
-      batchProducts.forEach((p, idx) => {
-        const cogsForeign = p.cogsRmb / rate;
-        const tariffAmt = cogsForeign * ((p.tariff || 0) / 100);
-        const vatAmt = (p.vatRate || 0) > 0 ? (p.price - (p.price / (1 + (p.vatRate / 100)))) : 0;
-        const platformComm = p.price * ((currentPlatform === 'TTS' ? 6.0 : 15.0) / 100);
-        const creatorComm = p.price * ((p.creatorComm || 0) / 100);
-        const returnLoss = p.price * ((p.returnRate || 0) / 100) * 0.25;
-        
-        const landedCost = cogsForeign + (p.firstLeg || 0) + tariffAmt + (p.fulfillment || 0) + (p.inbound || 0) + (p.storage || 0) + platformComm + creatorComm + (p.creatorFlat || 0) + (p.adCpa || 0) + returnLoss + vatAmt;
-        const netProfit = p.price - landedCost;
-        const margin = p.price > 0 ? (netProfit / p.price) * 100 : 0;
-        const totalProfit = netProfit * p.units;
-
-        const preMarketingProfit = p.price - (cogsForeign + (p.firstLeg || 0) + tariffAmt + (p.fulfillment || 0) + (p.inbound || 0) + (p.storage || 0) + platformComm + returnLoss + vatAmt);
-        const breakevenRoas = preMarketingProfit > 0 ? (p.price / preMarketingProfit) : 0;
-
-        totalUnits += p.units;
-        totalRev += p.price * p.units;
-        totalCogs += cogsForeign * p.units;
-        totalNet += totalProfit;
-
-        const tr = document.createElement('tr');
-        tr.className = "hover:bg-slate-800/60";
-        tr.innerHTML = `
-          <td class="py-2 px-2 font-medium text-white">${p.name}</td>
-          <td class="py-2 px-2">${p.units.toLocaleString()}</td>
-          <td class="py-2 px-2">${curSymbol}${p.price.toFixed(2)}</td>
-          <td class="py-2 px-2">¥${p.cogsRmb.toFixed(2)}</td>
-          <td class="py-2 px-2">${curSymbol}${((p.firstLeg || 0) + (p.fulfillment || 0)).toFixed(2)}</td>
-          <td class="py-2 px-2">${p.creatorComm}%</td>
-          <td class="py-2 px-2">${curSymbol}${p.adCpa.toFixed(2)}</td>
-          <td class="py-2 px-2 font-bold ${netProfit >= 0 ? 'text-emerald-400' : 'text-rose-400'}">${curSymbol}${netProfit.toFixed(2)}</td>
-          <td class="py-2 px-2 ${margin >= 15 ? 'text-sky-400 font-bold' : 'text-slate-400'}">${margin.toFixed(1)}%</td>
-          <td class="py-2 px-2 text-amber-300 font-bold">${breakevenRoas > 0 ? breakevenRoas.toFixed(2) + 'x' : 'N/A'}</td>
-          <td class="py-2 px-2 font-bold ${totalProfit >= 0 ? 'text-emerald-400' : 'text-rose-400'}">${curSymbol}${totalProfit.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
-          <td class="py-2 px-2 text-center"><button onclick="deleteBatchItem(${idx})" class="text-rose-400 hover:text-rose-300">✕</button></td>
-        `;
-        tbody.appendChild(tr);
-      });
-
-      document.getElementById('batchTotalUnits').innerText = totalUnits.toLocaleString();
-      document.getElementById('batchTotalRevenue').innerText = `${curSymbol}${totalRev.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
-      document.getElementById('batchTotalCogs').innerText = `${curSymbol}${totalCogs.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
-      const pSummary = document.getElementById('batchTotalNetProfit');
-      pSummary.innerText = `${curSymbol}${totalNet.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
-      pSummary.className = totalNet >= 0 ? 'text-xl font-black text-emerald-400 mt-0.5' : 'text-xl font-black text-rose-400 mt-0.5';
-      document.getElementById('batchCountText').innerText = `当前共 ${batchProducts.length} 个产品`;
-    }
-
-    function deleteBatchItem(index) {
-      batchProducts.splice(index, 1);
-      renderBatchTable();
-    }
-
-    document.getElementById('btnAddRow').addEventListener('click', () => {
-      batchProducts.push({
-        name: `SKU_${batchProducts.length + 1}`,
-        units: 500, price: 29.99, cogsRmb: 35.0, firstLeg: 2.0, fulfillment: 4.2,
-        inbound: 0.0, storage: 0.25, tariff: 0.0, platComm: 6.0, creatorComm: 15.0,
-        creatorFlat: 1.0, adCpa: 4.5, returnRate: 4.0, vatRate: 0.0
-      });
-      renderBatchTable();
-    });
-
-    // Excel Parsing
-    document.getElementById('btnTriggerUpload').addEventListener('click', () => document.getElementById('excelFileInput').click());
-    document.getElementById('excelFileInput').addEventListener('change', function(e) {
-      const file = e.target.files[0];
-      if (!file) return;
-      const reader = new FileReader();
-      reader.onload = function(evt) {
-        try {
-          const data = new Uint8Array(evt.target.result);
-          const workbook = XLSX.read(data, { type: 'array' });
-          const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
-          const jsonData = XLSX.utils.sheet_to_json(firstSheet, { defval: 0 });
-          if (!jsonData || jsonData.length === 0) return alert('表格内无数据');
-
-          batchProducts = jsonData.map((row, idx) => ({
-            name: row.SKU || row['品名'] || `SKU_${idx + 1}`,
-            units: parseFloat(row.Units || row['数量'] || 100),
-            price: parseFloat(row.Selling_Price || row['售价'] || 0),
-            cogsRmb: parseFloat(row.COGS_RMB || row['采购成本'] || 0),
-            firstLeg: parseFloat(row.First_Leg_Freight || row['头程运费'] || 0),
-            fulfillment: parseFloat(row.Fulfillment_Fee || row['尾程配送'] || 0),
-            inbound: parseFloat(row.Inbound_Placement || row['分仓配置费'] || 0),
-            storage: parseFloat(row.Storage_Fee || row['月仓租'] || 0),
-            tariff: parseFloat(row.Tariff_Rate_Pct || row['关税率'] || 0),
-            creatorComm: parseFloat(row.Creator_Comm_Pct || row['达人佣金率'] || 0),
-            creatorFlat: parseFloat(row.Creator_Flat_Fee || row['一口价平摊'] || 0),
-            adCpa: parseFloat(row.Target_Ad_CPA || row['广告CPA'] || 0),
-            returnRate: parseFloat(row.Return_Rate_Pct || row['退货率'] || 0),
-            vatRate: parseFloat(row.VAT_Rate_Pct || row['VAT率'] || 0)
-          }));
-          renderBatchTable();
-          alert(`成功解析并导入 ${batchProducts.length} 个产品数据！`);
-        } catch (err) { alert('解析 Excel 文件出错'); }
-      };
-      reader.readAsArrayBuffer(file);
-    });
-
-    // Download Template
-    document.getElementById('btnDownloadTemplate').addEventListener('click', () => {
-      const templateData = [
-        { SKU: "Auto_Shaker_650ml", Units: 1000, Selling_Price: 34.99, COGS_RMB: 42.0, First_Leg_Freight: 2.5, Fulfillment_Fee: 4.5, Inbound_Placement: 0.34, Storage_Fee: 0.3, Tariff_Rate_Pct: 7.5, Creator_Comm_Pct: 15.0, Creator_Flat_Fee: 1.0, Target_Ad_CPA: 5.0, Return_Rate_Pct: 5.0, VAT_Rate_Pct: 0.0 },
-        { SKU: "Chiikawa_Squishy_Set", Units: 2500, Selling_Price: 19.99, COGS_RMB: 18.0, First_Leg_Freight: 1.5, Fulfillment_Fee: 3.8, Inbound_Placement: 0.0, Storage_Fee: 0.2, Tariff_Rate_Pct: 0.0, Creator_Comm_Pct: 20.0, Creator_Flat_Fee: 0.5, Target_Ad_CPA: 3.5, Return_Rate_Pct: 4.0, VAT_Rate_Pct: 0.0 }
-      ];
-      const ws = XLSX.utils.json_to_sheet(templateData);
-      const wb = XLSX.utils.book_new();
-      XLSX.utils.book_append_sheet(wb, ws, "Batch_Template");
-      XLSX.writeFile(wb, "UnitMargin_Batch_Template.xlsx");
-    });
-
-    // Export CSV
-    document.getElementById('btnExportCsv').addEventListener('click', () => {
-      const curCode = currentRegion === 'US' ? 'USD' : (currentRegion === 'EU' ? 'EUR' : 'GBP');
-      const rate = fxState.rates[curCode] || 7.25;
-      const exportRows = batchProducts.map(p => {
-        const cogsForeign = p.cogsRmb / rate;
-        const tariffAmt = cogsForeign * ((p.tariff || 0) / 100);
-        const vatAmt = (p.vatRate || 0) > 0 ? (p.price - (p.price / (1 + (p.vatRate / 100)))) : 0;
-        const platformComm = p.price * ((currentPlatform === 'TTS' ? 6.0 : 15.0) / 100);
-        const creatorComm = p.price * ((p.creatorComm || 0) / 100);
-        const returnLoss = p.price * ((p.returnRate || 0) / 100) * 0.25;
-        const landedCost = cogsForeign + (p.firstLeg || 0) + tariffAmt + (p.fulfillment || 0) + (p.inbound || 0) + (p.storage || 0) + platformComm + creatorComm + (p.creatorFlat || 0) + (p.adCpa || 0) + returnLoss + vatAmt;
-        const netProfit = p.price - landedCost;
-        const margin = p.price > 0 ? (netProfit / p.price) * 100 : 0;
-        const preMarketingProfit = p.price - (cogsForeign + (p.firstLeg || 0) + tariffAmt + (p.fulfillment || 0) + (p.inbound || 0) + (p.storage || 0) + platformComm + returnLoss + vatAmt);
-        const breakevenRoas = preMarketingProfit > 0 ? (p.price / preMarketingProfit) : 0;
-        return {
-          SKU: p.name, Units: p.units, Price: p.price, CogsRMB: p.cogsRmb, CogsForeign: cogsForeign.toFixed(2),
-          NetProfitUnit: netProfit.toFixed(2), MarginPct: `${margin.toFixed(1)}%`, BreakevenROAS: breakevenRoas.toFixed(2) + 'x',
-          TotalNetProfit: (netProfit * p.units).toFixed(2)
-        };
-      });
-      const ws = XLSX.utils.json_to_sheet(exportRows);
-      const wb = XLSX.utils.book_new();
-      XLSX.utils.book_append_sheet(wb, ws, "Profit_Report");
-      XLSX.writeFile(wb, `UnitMargin_${currentPlatform}_${currentRegion}.xlsx`);
-    });
-
-    // Single Calculation
-    function calculateSingle() {
-      const curSymbol = regionalDefaults[currentRegion].symbol;
-      const curCode = currentRegion === 'US' ? 'USD' : (currentRegion === 'EU' ? 'EUR' : 'GBP');
-      const rate = fxState.rates[curCode] || 7.25;
-
-      const price = parseFloat(document.getElementById('inpPrice').value) || 0;
-      const cogsRmb = parseFloat(document.getElementById('inpCogsRmb').value) || 0;
-      const firstLeg = parseFloat(document.getElementById('inpFirstLeg').value) || 0;
-      const fulfillment = parseFloat(document.getElementById('inpFulfillment').value) || 0;
-      const inbound = parseFloat(document.getElementById('inpInbound').value) || 0;
-      const storage = parseFloat(document.getElementById('inpStorage').value) || 0;
-      const tariffRate = (parseFloat(document.getElementById('inpTariff').value) || 0) / 100;
-      const creatorCommRate = (parseFloat(document.getElementById('inpCreatorComm').value) || 0) / 100;
-      const creatorFlat = parseFloat(document.getElementById('inpCreatorFlat').value) || 0;
-      const adCpa = parseFloat(document.getElementById('inpAdCpa').value) || 0;
-
-      const cogsForeign = cogsRmb / rate;
-      const tariffAmt = cogsForeign * tariffRate;
-      const platformComm = price * (currentPlatform === 'TTS' ? 0.06 : 0.15);
-      const creatorComm = price * creatorCommRate;
-      const returnHit = price * 0.05 * 0.25;
-
-      const preMarketingProfit = price - (cogsForeign + firstLeg + tariffAmt + fulfillment + inbound + storage + platformComm + returnHit);
-      const totalCost = (cogsForeign + firstLeg + tariffAmt + fulfillment + inbound + storage + platformComm + returnHit) + creatorComm + creatorFlat + adCpa;
-      const netProfit = price - totalCost;
-      const netMargin = price > 0 ? (netProfit / price) * 100 : 0;
-      const breakevenRoas = preMarketingProfit > 0 ? (price / preMarketingProfit) : 0;
-      const maxCreatorCommPercent = preMarketingProfit > 0 ? ((preMarketingProfit - creatorFlat) / price) * 100 : 0;
-
-      const pEl = document.getElementById('valNetProfit');
-      pEl.innerText = `${curSymbol}${netProfit.toFixed(2)}`;
-      pEl.className = netProfit >= 0 ? 'text-2xl font-black text-emerald-400 mt-0.5' : 'text-2xl font-black text-rose-400 mt-0.5';
-      document.getElementById('valNetMargin').innerText = `${netMargin.toFixed(1)}%`;
-      document.getElementById('valBreakevenRoas').innerText = breakevenRoas > 0 ? `${breakevenRoas.toFixed(2)}x` : 'N/A';
-      document.getElementById('valMaxCreatorComm').innerText = maxCreatorCommPercent > 0 ? `${maxCreatorCommPercent.toFixed(1)}%` : '0.0%';
-    }
-
-    // Switcher Event Listeners
-    document.querySelectorAll('.btn-plat').forEach(btn => {
-      btn.addEventListener('click', () => {
-        currentPlatform = btn.getAttribute('data-val');
-        updateSwitcherUI();
-      });
-    });
-
-    document.querySelectorAll('.btn-region').forEach(btn => {
-      btn.addEventListener('click', () => {
-        currentRegion = btn.getAttribute('data-val');
-        updateSwitcherUI();
-      });
-    });
-
-    // View Switching
-    document.getElementById('btnModeSingle').addEventListener('click', () => {
-      document.getElementById('viewSingle').classList.remove('hidden');
-      document.getElementById('viewBatch').classList.add('hidden');
-      document.getElementById('btnModeSingle').className = "px-4 py-2 rounded-lg text-xs font-bold bg-sky-600 text-white shadow-md transition-all";
-      document.getElementById('btnModeBatch').className = "px-4 py-2 rounded-lg text-xs font-bold text-slate-400 hover:text-white hover:bg-slate-800 transition-all";
-    });
-
-    document.getElementById('btnModeBatch').addEventListener('click', () => {
-      document.getElementById('viewSingle').classList.add('hidden');
-      document.getElementById('viewBatch').classList.remove('hidden');
-      document.getElementById('btnModeBatch').className = "px-4 py-2 rounded-lg text-xs font-bold bg-sky-600 text-white shadow-md transition-all";
-      document.getElementById('btnModeSingle').className = "px-4 py-2 rounded-lg text-xs font-bold text-slate-400 hover:text-white hover:bg-slate-800 transition-all";
-      renderBatchTable();
-    });
-
-    document.querySelectorAll('#viewSingle input').forEach(i => i.addEventListener('input', calculateSingle));
-
-    // Boot
-    initFx();
-  </script>
-</body>
-</html>
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        <!-- Input Form (7 Cols) -->
+        <section class="lg:col-span-7 space-y-4">
+          <!-- 3 Basic Inputs -->
+          <div class="bg-slate-800 border border-slate-700 rounded-2xl p-4 sm:p-5 shadow space-y-4">
+            <h2 class="text-xs font-bold uppercase tracking-wider text-sky-400 flex items-center gap-1.5 border-b border-slate-700/80 pb-2">
+              <span>📝</span><span id="i18n-secBasics">Basic Cost Inputs (Just 3 Numbers)</span>
+            </h2>
+            <div
