@@ -1,107 +1,160 @@
 import os
-import re
-import urllib.request
 import json
 import shutil
 from datetime import datetime
 
 LOG_DIR = "logs"
-LATEST_LOG = os.path.join(LOG_DIR, "latest_fx.json")
-PREVIOUS_LOG = os.path.join(LOG_DIR, "previous_fx.json")
-INDEX_PATH = "index.html"
+LATEST_LOG = os.path.join(LOG_DIR, "latest_rules.json")
+PREVIOUS_LOG = os.path.join(LOG_DIR, "previous_rules.json")
+OUTPUT_RULES = "marketplace_rules.json"
 
 def ensure_log_dir():
     if not os.path.exists(LOG_DIR):
         os.makedirs(LOG_DIR)
 
-def fetch_live_rates():
-    """从公共接口抓取最新实时汇率"""
-    url = "https://open.er-api.com/v6/latest/CNY"
-    req = urllib.request.Request(url, headers={'User-Agent': 'Mozilla/5.0'})
-    try:
-        with urllib.request.urlopen(req, timeout=10) as response:
-            data = json.loads(response.read().decode('utf-8'))
-            rates = data.get("rates", {})
-            usd = rates.get("USD")
-            eur = rates.get("EUR")
-            gbp = rates.get("GBP")
-
-            # 严格有效性校验：防止空值或 0
-            if not (usd and eur and gbp and usd > 0 and eur > 0 and gbp > 0):
-                raise ValueError("Incomplete or zero currency rates received.")
-
-            return {
-                "timestamp": datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S UTC"),
-                "status": "success",
-                "rates": {
-                    "USD": round(1 / usd, 2),
-                    "EUR": round(1 / eur, 2),
-                    "GBP": round(1 / gbp, 2)
+def build_marketplace_metrics():
+    """
+    平台全指标基准库（涵盖 Amazon FBA 与 TikTok Shop 在美区、欧区、英区的全量类目与费率参数）
+    未来接入各大平台爬虫或官方公告数据源时，在此函数内解析并更新即可
+    """
+    return {
+        "timestamp": datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S UTC"),
+        "status": "active",
+        "platforms": {
+            "TTS": {
+                "name": "TikTok Shop",
+                "regions": {
+                    "US": {
+                        "currency": "USD",
+                        "symbol": "$",
+                        "vat_rate": 0.0,
+                        "tariff_rate": 7.5,
+                        "inbound_placement": 0.0,
+                        "storage_fee": 0.25,
+                        "return_rate": 5.0,
+                        "default_fulfillment": 4.50,
+                        "categories": {
+                            "Standard / General (常规通用类目)": 6.0,
+                            "New Seller Promo (新店特惠/优惠期)": 3.0,
+                            "Consumer Electronics (3C数码)": 5.0,
+                            "Fashion & Apparel (服饰箱包)": 6.0,
+                            "Beauty & Personal Care (美妆个护)": 6.0
+                        }
+                    },
+                    "EU": {
+                        "currency": "EUR",
+                        "symbol": "€",
+                        "vat_rate": 19.0,
+                        "tariff_rate": 4.5,
+                        "inbound_placement": 0.0,
+                        "storage_fee": 0.30,
+                        "return_rate": 4.0,
+                        "default_fulfillment": 4.80,
+                        "categories": {
+                            "Standard / General (常规通用类目)": 6.0,
+                            "New Seller Promo (新店特惠期)": 3.0,
+                            "Consumer Electronics (3C数码)": 5.0,
+                            "Fashion & Apparel (服饰箱包)": 6.0
+                        }
+                    },
+                    "UK": {
+                        "currency": "GBP",
+                        "symbol": "£",
+                        "vat_rate": 20.0,
+                        "tariff_rate": 4.0,
+                        "inbound_placement": 0.0,
+                        "storage_fee": 0.25,
+                        "return_rate": 4.0,
+                        "default_fulfillment": 3.60,
+                        "categories": {
+                            "Standard / General (英区常规通用)": 5.0,
+                            "New Seller Promo (新手扶持期)": 2.5,
+                            "Consumer Electronics (3C数码)": 5.0,
+                            "Fashion & Apparel (服饰箱包)": 5.0
+                        }
+                    }
+                }
+            },
+            "AMZ": {
+                "name": "Amazon FBA",
+                "regions": {
+                    "US": {
+                        "currency": "USD",
+                        "symbol": "$",
+                        "vat_rate": 0.0,
+                        "tariff_rate": 7.5,
+                        "inbound_placement": 0.34,  # 2024起美区亚马逊分仓配置费
+                        "storage_fee": 0.35,
+                        "return_rate": 4.0,
+                        "default_fulfillment": 5.80,
+                        "categories": {
+                            "Home & Kitchen (家居厨具)": 15.0,
+                            "Consumer Electronics (消费数码)": 8.0,
+                            "Automotive & Tools (汽配与工具)": 12.0,
+                            "Clothing & Apparel (服饰大类 >$20)": 17.0,
+                            "Clothing & Apparel (低客单服饰 <=$15)": 5.0,
+                            "Sports & Outdoors (户外运动)": 15.0,
+                            "Beauty & Personal Care (美妆个护)": 15.0,
+                            "General / Other (其它常规类目)": 15.0
+                        }
+                    },
+                    "EU": {
+                        "currency": "EUR",
+                        "symbol": "€",
+                        "vat_rate": 19.0,
+                        "tariff_rate": 4.5,
+                        "inbound_placement": 0.0,
+                        "storage_fee": 0.40,
+                        "return_rate": 4.0,
+                        "default_fulfillment": 5.20,
+                        "categories": {
+                            "Home & Kitchen (家居厨具)": 15.0,
+                            "Consumer Electronics (消费电子)": 7.0,
+                            "Automotive (汽车用品)": 15.0,
+                            "Clothing & Accessories (服装配件)": 15.0,
+                            "General / Other (常规通用类目)": 15.0
+                        }
+                    },
+                    "UK": {
+                        "currency": "GBP",
+                        "symbol": "£",
+                        "vat_rate": 20.0,
+                        "tariff_rate": 4.0,
+                        "inbound_placement": 0.0,
+                        "storage_fee": 0.35,
+                        "return_rate": 4.0,
+                        "default_fulfillment": 3.80,
+                        "categories": {
+                            "Home & Kitchen (家居厨具)": 15.3,
+                            "Consumer Electronics (消费电子)": 7.14,
+                            "Automotive (汽车用品)": 15.3,
+                            "Clothing & Accessories (服装服饰)": 15.3,
+                            "General / Other (常规通用类目)": 15.3
+                        }
+                    }
                 }
             }
-    except Exception as e:
-        print(f"[Warning] Live fetch failed: {e}")
-        return None
+        }
+    }
 
 def rotate_and_save_logs(new_data):
-    """滚动备份：若存在 latest，则将其归档为 previous，然后写入新 latest"""
     ensure_log_dir()
     if os.path.exists(LATEST_LOG):
         shutil.copyfile(LATEST_LOG, PREVIOUS_LOG)
-        print(f"[Backup] Archived current latest to {PREVIOUS_LOG}")
+        print(f"[Backup] Archived previous rules to {PREVIOUS_LOG}")
     
     with open(LATEST_LOG, "w", encoding="utf-8") as f:
         json.dump(new_data, f, indent=2, ensure_ascii=False)
-    print(f"[Success] Written latest snapshot to {LATEST_LOG}")
+    print(f"[Success] Written latest rules snapshot to {LATEST_LOG}")
 
-def get_fallback_rates():
-    """容错回滚方案：优先读取 previous_fx.json，最后使用保底常量"""
-    if os.path.exists(PREVIOUS_LOG):
-        try:
-            with open(PREVIOUS_LOG, "r", encoding="utf-8") as f:
-                prev_data = json.load(f)
-                print(f"[Rollback] Restoring rates from previous snapshot ({prev_data.get('timestamp')})")
-                return prev_data.get("rates")
-        except Exception as e:
-            print(f"[Error] Failed to read previous log: {e}")
-    
-    print("[Fallback] Utilizing hardcoded base rates.")
-    return {"USD": 7.25, "EUR": 7.82, "GBP": 9.15}
-
-def apply_rates_to_html(rates):
-    if not os.path.exists(INDEX_PATH):
-        print(f"[Error] {INDEX_PATH} not found.")
-        return False
-
-    with open(INDEX_PATH, "r", encoding="utf-8") as f:
-        content = f.read()
-
-    # 匹配并替换 JavaScript 中的默认保底汇率对象
-    pattern = r"const\s+fxState\s*=\s*\{\s*rates:\s*\{[^}]*\}\s*\};"
-    replacement = f"const fxState = {{ rates: {{ USD: {rates['USD']}, EUR: {rates['EUR']}, GBP: {rates['GBP']} }} }};"
-
-    new_content = re.sub(pattern, replacement, content)
-    if new_content != content:
-        with open(INDEX_PATH, "w", encoding="utf-8") as f:
-            f.write(new_content)
-        print(f"[Updated] index.html synced with rates: {rates}")
-        return True
-    else:
-        print("[No-op] index.html already matches target rates.")
-        return False
+    # 同时写出供前端 index.html 实时请求使用的全局规则配置
+    with open(OUTPUT_RULES, "w", encoding="utf-8") as f:
+        json.dump(new_data, f, indent=2, ensure_ascii=False)
+    print(f"[Success] Published {OUTPUT_RULES} for frontend access.")
 
 def main():
-    ensure_log_dir()
-    fetched = fetch_live_rates()
-
-    if fetched:
-        target_rates = fetched["rates"]
-        rotate_and_save_logs(fetched)
-    else:
-        # 抓取失败触发自动回滚
-        target_rates = get_fallback_rates()
-
-    apply_rates_to_html(target_rates)
+    metrics = build_marketplace_metrics()
+    rotate_and_save_logs(metrics)
 
 if __name__ == "__main__":
     main()
