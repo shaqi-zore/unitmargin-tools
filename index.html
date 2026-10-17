@@ -1,0 +1,461 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Cross-Border Seller Margin & Breakeven Calculator | UnitMargin Lab</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    input::-webkit-outer-spin-button, input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+  </style>
+</head>
+<body class="bg-slate-900 text-slate-100 min-h-screen py-6 px-3 sm:px-6 font-sans">
+  <div class="max-w-5xl mx-auto space-y-6">
+    
+    <!-- Top Nav / Selectors -->
+    <header class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-slate-800/80 border border-slate-700 p-4 rounded-xl">
+      <div>
+        <h1 id="i18n-appTitle" class="text-xl sm:text-2xl font-black text-white tracking-tight">Multi-Platform Unit Margin Lab</h1>
+        <p id="i18n-appDesc" class="text-xs text-slate-400 mt-0.5">Precise unit economics with real-time FX, marketplace commissions & hidden costs.</p>
+      </div>
+
+      <div class="flex flex-wrap items-center gap-2 text-xs">
+        <!-- Region -->
+        <div class="flex flex-col">
+          <label id="i18n-lblRegion" class="text-[10px] text-slate-400 mb-0.5 uppercase font-semibold">Region</label>
+          <select id="selRegion" class="bg-slate-900 border border-slate-700 rounded px-2.5 py-1.5 text-white font-medium focus:outline-none focus:border-sky-500">
+            <option value="US" selected>🇺🇸 US (USD)</option>
+            <option value="EU">🇪🇺 EU (EUR)</option>
+            <option value="UK">🇬🇧 UK (GBP)</option>
+          </select>
+        </div>
+
+        <!-- Platform -->
+        <div class="flex flex-col">
+          <label id="i18n-lblPlatform" class="text-[10px] text-slate-400 mb-0.5 uppercase font-semibold">Platform</label>
+          <select id="selPlatform" class="bg-slate-900 border border-slate-700 rounded px-2.5 py-1.5 text-white font-medium focus:outline-none focus:border-sky-500">
+            <option value="AMZ" selected>Amazon FBA</option>
+            <option value="TTS">TikTok Shop</option>
+          </select>
+        </div>
+
+        <!-- Language -->
+        <div class="flex flex-col">
+          <label id="i18n-lblLang" class="text-[10px] text-slate-400 mb-0.5 uppercase font-semibold">Language</label>
+          <select id="selLang" class="bg-slate-900 border border-slate-700 rounded px-2.5 py-1.5 text-white font-medium focus:outline-none focus:border-sky-500">
+            <option value="en" selected>English</option>
+            <option value="de">Deutsch</option>
+            <option value="zh">中文 (简体)</option>
+          </select>
+        </div>
+      </div>
+    </header>
+
+    <!-- Main Workspace -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      
+      <!-- Input Panel -->
+      <section class="lg:col-span-2 bg-slate-800 border border-slate-700 rounded-xl p-5 space-y-4">
+        <div class="flex justify-between items-center border-b border-slate-700 pb-2">
+          <h2 id="i18n-secInputs" class="text-xs font-bold uppercase tracking-wider text-sky-400">Parameter Configuration</h2>
+          <span id="fxStatus" class="text-[10px] text-emerald-400 font-mono bg-emerald-950/60 border border-emerald-800 px-2 py-0.5 rounded">● Live FX Active</span>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <!-- Selling Price -->
+          <div>
+            <label id="i18n-lblPrice" class="block text-xs text-slate-300 mb-1">Selling Price (Inc. VAT for EU/UK)</label>
+            <div class="relative">
+              <span id="currSymbol1" class="absolute left-3 top-2 text-slate-500 text-sm">\$</span>
+              <input type="number" id="inpPrice" value="35.00" step="0.01" class="w-full bg-slate-900 border border-slate-700 rounded-lg pl-7 pr-3 py-2 text-white text-sm font-mono focus:border-sky-500 focus:outline-none" />
+            </div>
+          </div>
+
+          <!-- COGS in RMB -->
+          <div>
+            <div class="flex justify-between items-center mb-1">
+              <label id="i18n-lblCogsRmb" class="text-xs text-slate-300">Procurement / COGS (¥ RMB)</label>
+              <span id="fxRateDisplay" class="text-[10px] text-slate-400 font-mono">1 USD = 7.25 CNY</span>
+            </div>
+            <div class="relative">
+              <span class="absolute left-3 top-2 text-slate-500 text-sm">¥</span>
+              <input type="number" id="inpCogsRmb" value="55.00" step="0.01" class="w-full bg-slate-900 border border-slate-700 rounded-lg pl-7 pr-3 py-2 text-white text-sm font-mono focus:border-sky-500 focus:outline-none" />
+            </div>
+          </div>
+
+          <!-- First Leg Shipping -->
+          <div>
+            <label id="i18n-lblFirstLeg" class="block text-xs text-slate-300 mb-1">First-Leg Freight / Unit</label>
+            <div class="relative">
+              <span id="currSymbol2" class="absolute left-3 top-2 text-slate-500 text-sm">\$</span>
+              <input type="number" id="inpFirstLeg" value="2.50" step="0.01" class="w-full bg-slate-900 border border-slate-700 rounded-lg pl-7 pr-3 py-2 text-white text-sm font-mono focus:border-sky-500 focus:outline-none" />
+            </div>
+          </div>
+
+          <!-- Fulfillment / 3PL -->
+          <div>
+            <label id="i18n-lblFulfillment" class="block text-xs text-slate-300 mb-1">Fulfillment / FBA Fee</label>
+            <div class="relative">
+              <span id="currSymbol3" class="absolute left-3 top-2 text-slate-500 text-sm">\$</span>
+              <input type="number" id="inpFulfillment" value="5.80" step="0.01" class="w-full bg-slate-900 border border-slate-700 rounded-lg pl-7 pr-3 py-2 text-white text-sm font-mono focus:border-sky-500 focus:outline-none" />
+            </div>
+          </div>
+
+          <!-- Inbound / Placement -->
+          <div id="wrapperInbound">
+            <label id="i18n-lblInbound" class="block text-xs text-slate-300 mb-1">Inbound Placement Fee</label>
+            <div class="relative">
+              <span id="currSymbol4" class="absolute left-3 top-2 text-slate-500 text-sm">\$</span>
+              <input type="number" id="inpInbound" value="0.32" step="0.01" class="w-full bg-slate-900 border border-slate-700 rounded-lg pl-7 pr-3 py-2 text-white text-sm font-mono focus:border-sky-500 focus:outline-none" />
+            </div>
+          </div>
+
+          <!-- Referral / Platform Commission -->
+          <div>
+            <label id="i18n-lblCommission" class="block text-xs text-slate-300 mb-1">Platform Referral Fee (%)</label>
+            <input type="number" id="inpCommission" value="15.0" step="0.1" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-white text-sm font-mono focus:border-sky-500 focus:outline-none" />
+          </div>
+
+          <!-- Estimated Return Rate -->
+          <div>
+            <label id="i18n-lblReturns" class="block text-xs text-slate-300 mb-1">Estimated Return Rate (%)</label>
+            <input type="number" id="inpReturnRate" value="4.0" step="0.1" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-white text-sm font-mono focus:border-sky-500 focus:outline-none" />
+          </div>
+
+          <!-- VAT Rate for EU/UK -->
+          <div id="wrapperVat">
+            <label id="i18n-lblVat" class="block text-xs text-slate-300 mb-1">Standard VAT Rate (%)</label>
+            <input type="number" id="inpVat" value="19.0" step="0.1" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-white text-sm font-mono focus:border-sky-500 focus:outline-none" />
+          </div>
+
+          <!-- Target CPA / Ad Cost -->
+          <div class="sm:col-span-2">
+            <label id="i18n-lblCpa" class="block text-xs text-slate-300 mb-1">Target Ad Cost per Order (CPA)</label>
+            <div class="relative">
+              <span id="currSymbol5" class="absolute left-3 top-2 text-slate-500 text-sm">\$</span>
+              <input type="number" id="inpCpa" value="7.00" step="0.01" class="w-full bg-slate-900 border border-slate-700 rounded-lg pl-7 pr-3 py-2 text-white text-sm font-mono focus:border-sky-500 focus:outline-none" />
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Results Display -->
+      <section class="bg-slate-800 border border-slate-700 rounded-xl p-5 flex flex-col justify-between">
+        <div class="space-y-4">
+          <h2 id="i18n-secMetrics" class="text-xs font-bold uppercase tracking-wider text-emerald-400 border-b border-slate-700 pb-2">Unit Economics</h2>
+          
+          <div>
+            <span id="i18n-resProfit" class="text-xs text-slate-400">Net Profit / Unit</span>
+            <p id="valNetProfit" class="text-3xl font-black text-emerald-400">\$0.00</p>
+          </div>
+
+          <div>
+            <span id="i18n-resMargin" class="text-xs text-slate-400">Net Profit Margin</span>
+            <p id="valNetMargin" class="text-xl font-bold text-sky-400">0.0%</p>
+          </div>
+
+          <div class="pt-2 border-t border-slate-700/80">
+            <span id="i18n-resRoas" class="text-xs text-amber-300 font-semibold">Breakeven ROAS</span>
+            <p id="valBreakevenRoas" class="text-2xl font-bold text-amber-400">0.00x</p>
+            <p id="i18n-resRoasTip" class="text-[11px] text-slate-400 mt-0.5">Minimum return needed on ad campaigns to avoid operating at a net loss.</p>
+          </div>
+        </div>
+
+        <!-- Breakdown List -->
+        <div class="mt-4 pt-3 border-t border-slate-700/60 text-[11px] font-mono space-y-1 text-slate-400">
+          <div class="flex justify-between"><span id="i18n-resVatCut">VAT Deduction:</span><span id="valVatCut" class="text-slate-200">\$0.00</span></div>
+          <div class="flex justify-between"><span id="i18n-resCogsConverted">COGS Converted:</span><span id="valCogsUsd" class="text-slate-200">\$0.00</span></div>
+          <div class="flex justify-between"><span id="i18n-resFees">Platform Fees:</span><span id="valPlatformFee" class="text-slate-200">\$0.00</span></div>
+          <div class="flex justify-between"><span id="i18n-resTotalCost">Total Landed Cost:</span><span id="valTotalCost" class="text-slate-200">\$0.00</span></div>
+        </div>
+
+        <!-- Ko-fi Link (Configured) -->
+        <div class="mt-6 pt-4 border-t border-slate-700">
+          <a href="https://ko-fi.com/unitmarginlab" target="_blank" class="block w-full py-2.5 px-4 bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-center rounded-lg text-xs transition duration-150">
+            ☕ Support UnitMargin Lab on Ko-fi
+          </a>
+        </div>
+      </section>
+    </div>
+
+    <!-- Operating Guide -->
+    <article class="bg-slate-800/60 border border-slate-750 rounded-xl p-5 text-xs text-slate-400 space-y-2">
+      <h3 id="i18n-guideHeader" class="font-bold text-slate-200">Regional Accounting Logic</h3>
+      <div id="i18n-guideBody" class="space-y-1 leading-relaxed">
+        <!-- Injected via JS -->
+      </div>
+    </article>
+
+    <footer class="text-center text-[11px] text-slate-500 space-y-1 pt-2">
+      <p>© 2026 UnitMargin Lab. Open unit-economic models for cross-border merchants.</p>
+      <p>Independent utility. Not sponsored, affiliated, or endorsed by Amazon, TikTok, or Shopify.</p>
+    </footer>
+  </div>
+
+  <script>
+    // Live FX Rates Cache
+    const fxState = {
+      rates: { USD: 7.25, EUR: 7.82, GBP: 9.15 },
+      base: 'CNY',
+      activeTarget: 'USD'
+    };
+
+    const regionalDefaults = {
+      US: { symbol: '\$', vat: 0, showVat: false, amzComm: 15.0, ttsComm: 6.0, amzFulfill: 5.80, ttsFulfill: 4.20, showPlacement: true },
+      EU: { symbol: '€', vat: 19.0, showVat: true, amzComm: 15.0, ttsComm: 6.0, amzFulfill: 5.20, ttsFulfill: 4.50, showPlacement: false },
+      UK: { symbol: '£', vat: 20.0, showVat: true, amzComm: 15.3, ttsComm: 5.0, amzFulfill: 3.80, ttsFulfill: 3.50, showPlacement: false }
+    };
+
+    const dict = {
+      en: {
+        appTitle: "Multi-Platform Unit Margin Lab",
+        appDesc: "Precise unit economics with real-time FX, marketplace commissions & hidden costs.",
+        lblRegion: "Region",
+        lblPlatform: "Platform",
+        lblLang: "Language",
+        secInputs: "Parameter Configuration",
+        lblPrice: "Selling Price",
+        lblCogsRmb: "Procurement / COGS (¥ RMB)",
+        lblFirstLeg: "First-Leg Freight / Unit",
+        lblFulfillment: "Fulfillment Fee / FBA",
+        lblInbound: "Inbound Placement Fee",
+        lblCommission: "Platform Referral Fee (%)",
+        lblReturns: "Estimated Return Rate (%)",
+        lblVat: "Standard VAT Rate (%)",
+        lblCpa: "Target Ad Cost per Order (CPA)",
+        secMetrics: "Unit Economics",
+        resProfit: "Net Profit / Unit",
+        resMargin: "Net Profit Margin",
+        resRoas: "Breakeven ROAS",
+        resRoasTip: "Minimum return needed on ad campaigns to avoid operating at a net loss.",
+        resVatCut: "VAT Deduction:",
+        resCogsConverted: "COGS Converted:",
+        resFees: "Platform Fees:",
+        resTotalCost: "Total Cost / Unit:",
+        guideHeader: "Accounting Breakdown & Rules",
+        guideLines: [
+          "• <strong>EU/UK VAT Handling:</strong> Net Revenue = Price / (1 + VAT Rate). Commission is typically computed on Gross Price.",
+          "• <strong>Breakeven ROAS:</strong> Calculated on Net Revenue before Ad CPA. Essential for scaling TikTok Shop & Meta campaigns safely.",
+          "• <strong>Inbound Placement:</strong> Mandatory cost item on Amazon US since 2024; automated out on EU/UK channels."
+        ]
+      },
+      de: {
+        appTitle: "Plattformübergreifender Margenrechner",
+        appDesc: "Genaue Deckungsbeitragsrechnung mit Live-Wechselkursen, Gebühren und Steuern.",
+        lblRegion: "Region",
+        lblPlatform: "Plattform",
+        lblLang: "Sprache",
+        secInputs: "Kostenparameter",
+        lblPrice: "Verkaufspreis (Brutto)",
+        lblCogsRmb: "Einkaufspreis / COGS (¥ RMB)",
+        lblFirstLeg: "Frachtkosten / Einheit",
+        lblFulfillment: "Versandgebühr / FBA",
+        lblInbound: "Lagerplatzierungsgebühr",
+        lblCommission: "Verkaufsgebühr (%)",
+        lblReturns: "Geschätzte Retourenquote (%)",
+        lblVat: "Umsatzsteuersatz (%)",
+        lblCpa: "Ziel-Werbekosten pro Bestellung (CPA)",
+        secMetrics: "Wirtschaftlichkeit",
+        resProfit: "Nettogewinn / Stück",
+        resMargin: "Nettomarge",
+        resRoas: "Breakeven ROAS",
+        resRoasTip: "Mindest-Werberendite, um Verluste bei Werbeanzeigen zu vermeiden.",
+        resVatCut: "MwSt.-Abzug:",
+        resCogsConverted: "Einkaufskosten umgerechnet:",
+        resFees: "Plattformgebühren:",
+        resTotalCost: "Gesamtkosten / Stück:",
+        guideHeader: "Berechnungsgrundlagen",
+        guideLines: [
+          "• <strong>USt-Kalkulation (EU/UK):</strong> Nettoumsatz = Bruttopreis / (1 + USt-Satz).",
+          "• <strong>Breakeven ROAS:</strong> Mindest-ROAS vor Zurechnung der Klickkosten.",
+          "• <strong>Inbound Placement:</strong> Spezifische FBA-Gebühren für den US-Markt."
+        ]
+      },
+      zh: {
+        appTitle: "多平台跨境单元经济模型测算器",
+        appDesc: "集成实时外汇、欧美 VAT 扣除、平台佣金及保本 ROAS 精算。",
+        lblRegion: "销售站点",
+        lblPlatform: "电商平台",
+        lblLang: "界面语言",
+        secInputs: "成本与费率参数",
+        lblPrice: "前台售价 (含税)",
+        lblCogsRmb: "采购成本 (¥ 人民币)",
+        lblFirstLeg: "单件头程运费",
+        lblFulfillment: "尾程仓发 / 配送费",
+        lblInbound: "入库分仓配置费",
+        lblCommission: "平台佣金提点 (%)",
+        lblReturns: "预估退货率 (%)",
+        lblVat: "标准增值税率 (VAT %)",
+        lblCpa: "单单成效广告花费 (CPA)",
+        secMetrics: "单品盈利指标",
+        resProfit: "单件净利润",
+        resMargin: "净利润率",
+        resRoas: "保本广告投产比 (ROAS)",
+        resRoasTip: "投流保本线，低于此 ROAS 跑广告处于纯亏损状态。",
+        resVatCut: "VAT 增值税扣除:",
+        resCogsConverted: "采购折算外币:",
+        resFees: "平台杂费总额:",
+        resTotalCost: "单件全部支出:",
+        guideHeader: "跨国核算口径说明",
+        guideLines: [
+          "• <strong>欧洲/英国 VAT 处理：</strong> 真实入账净收入 = 售价 / (1 + VAT税率)。平台佣金绝大多数以含税全价为基数抽取。",
+          "• <strong>保本 ROAS：</strong> 不含广告成本的单件贡献利润反推，是 TikTok Shop 投流与测款核心安全指标。",
+          "• <strong>实时汇率：</strong> 自动同步离岸人民币牌价，可自动换算采购成本。"
+        ]
+      }
+    };
+
+    // Fetch Live FX
+    async function initFx() {
+      try {
+        const res = await fetch('https://open.er-api.com/v6/latest/CNY');
+        const data = await res.json();
+        if (data && data.rates) {
+          // CNY to foreign currencies -> inverted
+          fxState.rates.USD = 1 / data.rates.USD;
+          fxState.rates.EUR = 1 / data.rates.EUR;
+          fxState.rates.GBP = 1 / data.rates.GBP;
+          document.getElementById('fxStatus').innerText = '● Live FX Active';
+        }
+      } catch (e) {
+        document.getElementById('fxStatus').innerText = '● Fallback FX Loaded';
+      }
+      updateFxDisplay();
+      calculate();
+    }
+
+    function updateFxDisplay() {
+      const reg = document.getElementById('selRegion').value;
+      const cur = regionalDefaults[reg].symbol;
+      const curCode = reg === 'US' ? 'USD' : (reg === 'EU' ? 'EUR' : 'GBP');
+      const rate = fxState.rates[curCode] || 7.25;
+      document.getElementById('fxRateDisplay').innerText = `1 ${curCode} ≈ ${rate.toFixed(2)} CNY`;
+      
+      // Update symbol on inputs
+      for (let i = 1; i <= 5; i++) {
+        const el = document.getElementById(`currSymbol${i}`);
+        if (el) el.innerText = cur;
+      }
+    }
+
+    function syncPresets() {
+      const reg = document.getElementById('selRegion').value;
+      const plat = document.getElementById('selPlatform').value;
+      const conf = regionalDefaults[reg];
+
+      // VAT display
+      document.getElementById('wrapperVat').style.display = conf.showVat ? 'block' : 'none';
+      document.getElementById('inpVat').value = conf.vat;
+
+      // Placement fee display (US Only)
+      document.getElementById('wrapperInbound').style.display = conf.showPlacement && plat === 'AMZ' ? 'block' : 'none';
+      if (!conf.showPlacement || plat !== 'AMZ') {
+        document.getElementById('inpInbound').value = 0;
+      } else {
+        document.getElementById('inpInbound').value = 0.32;
+      }
+
+      // Commission and Fulfillment defaults
+      document.getElementById('inpCommission').value = plat === 'AMZ' ? conf.amzComm : conf.ttsComm;
+      document.getElementById('inpFulfillment').value = plat === 'AMZ' ? conf.amzFulfill : conf.ttsFulfill;
+
+      updateFxDisplay();
+      calculate();
+    }
+
+    function updateLanguage() {
+      const lang = document.getElementById('selLang').value;
+      const t = dict[lang] || dict.en;
+
+      document.getElementById('i18n-appTitle').innerText = t.appTitle;
+      document.getElementById('i18n-appDesc').innerText = t.appDesc;
+      document.getElementById('i18n-lblRegion').innerText = t.lblRegion;
+      document.getElementById('i18n-lblPlatform').innerText = t.lblPlatform;
+      document.getElementById('i18n-lblLang').innerText = t.lblLang;
+      document.getElementById('i18n-secInputs').innerText = t.secInputs;
+      document.getElementById('i18n-lblPrice').innerText = t.lblPrice;
+      document.getElementById('i18n-lblCogsRmb').innerText = t.lblCogsRmb;
+      document.getElementById('i18n-lblFirstLeg').innerText = t.lblFirstLeg;
+      document.getElementById('i18n-lblFulfillment').innerText = t.lblFulfillment;
+      document.getElementById('i18n-lblInbound').innerText = t.lblInbound;
+      document.getElementById('i18n-lblCommission').innerText = t.lblCommission;
+      document.getElementById('i18n-lblReturns').innerText = t.lblReturns;
+      document.getElementById('i18n-lblVat').innerText = t.lblVat;
+      document.getElementById('i18n-lblCpa').innerText = t.lblCpa;
+      document.getElementById('i18n-secMetrics').innerText = t.secMetrics;
+      document.getElementById('i18n-resProfit').innerText = t.resProfit;
+      document.getElementById('i18n-resMargin').innerText = t.resMargin;
+      document.getElementById('i18n-resRoas').innerText = t.resRoas;
+      document.getElementById('i18n-resRoasTip').innerText = t.resRoasTip;
+      document.getElementById('i18n-resVatCut').innerText = t.resVatCut;
+      document.getElementById('i18n-resCogsConverted').innerText = t.resCogsConverted;
+      document.getElementById('i18n-resFees').innerText = t.resFees;
+      document.getElementById('i18n-resTotalCost').innerText = t.resTotalCost;
+      document.getElementById('i18n-guideHeader').innerText = t.guideHeader;
+
+      const guideBody = document.getElementById('i18n-guideBody');
+      guideBody.innerHTML = t.guideLines.map(l => `<p>${l}</p>`).join('');
+    }
+
+    function calculate() {
+      const reg = document.getElementById('selRegion').value;
+      const curSymbol = regionalDefaults[reg].symbol;
+      const curCode = reg === 'US' ? 'USD' : (reg === 'EU' ? 'EUR' : 'GBP');
+      const rate = fxState.rates[curCode] || 7.25;
+
+      const price = parseFloat(document.getElementById('inpPrice').value) || 0;
+      const cogsRmb = parseFloat(document.getElementById('inpCogsRmb').value) || 0;
+      const firstLeg = parseFloat(document.getElementById('inpFirstLeg').value) || 0;
+      const fulfillment = parseFloat(document.getElementById('inpFulfillment').value) || 0;
+      const inbound = parseFloat(document.getElementById('inpInbound').value) || 0;
+      const commRate = (parseFloat(document.getElementById('inpCommission').value) || 0) / 100;
+      const returnRate = (parseFloat(document.getElementById('inpReturnRate').value) || 0) / 100;
+      const vatRate = (parseFloat(document.getElementById('inpVat').value) || 0) / 100;
+      const cpa = parseFloat(document.getElementById('inpCpa').value) || 0;
+
+      // VAT processing
+      const hasVat = regionalDefaults[reg].showVat;
+      const vatAmount = hasVat ? (price - (price / (1 + vatRate))) : 0;
+      const netRevenue = price - vatAmount;
+
+      // Cost conversion
+      const cogsForeign = cogsRmb / rate;
+      const commissionFee = price * commRate;
+      const returnHit = price * returnRate * 0.25;
+
+      const nonAdCosts = cogsForeign + firstLeg + fulfillment + inbound + commissionFee + returnHit + vatAmount;
+      const totalCost = nonAdCosts + cpa;
+      const netProfit = price - totalCost;
+      const margin = price > 0 ? (netProfit / price) * 100 : 0;
+
+      // Breakeven ROAS = Gross Price / (Net Revenue - NonAdLandedCostExcludingVAT)
+      const contributionMargin = netRevenue - (cogsForeign + firstLeg + fulfillment + inbound + commissionFee + returnHit);
+      const breakevenRoas = contributionMargin > 0 ? (price / contributionMargin) : 0;
+
+      // Render Output
+      const pEl = document.getElementById('valNetProfit');
+      pEl.innerText = `${curSymbol}${netProfit.toFixed(2)}`;
+      pEl.className = netProfit >= 0 ? 'text-3xl font-black text-emerald-400' : 'text-3xl font-black text-rose-400';
+
+      document.getElementById('valNetMargin').innerText = `${margin.toFixed(1)}%`;
+      document.getElementById('valBreakevenRoas').innerText = breakevenRoas > 0 ? `${breakevenRoas.toFixed(2)}x` : 'N/A';
+
+      document.getElementById('valVatCut').innerText = `${curSymbol}${vatAmount.toFixed(2)}`;
+      document.getElementById('valCogsUsd').innerText = `${curSymbol}${cogsForeign.toFixed(2)}`;
+      document.getElementById('valPlatformFee').innerText = `${curSymbol}${(commissionFee + inbound + fulfillment).toFixed(2)}`;
+      document.getElementById('valTotalCost').innerText = `${curSymbol}${totalCost.toFixed(2)}`;
+    }
+
+    // Event Bindings
+    document.getElementById('selRegion').addEventListener('change', syncPresets);
+    document.getElementById('selPlatform').addEventListener('change', syncPresets);
+    document.getElementById('selLang').addEventListener('change', updateLanguage);
+    document.querySelectorAll('input').forEach(i => i.addEventListener('input', calculate));
+
+    // Boot
+    updateLanguage();
+    syncPresets();
+    initFx();
+  </script>
+</body>
+</html>
