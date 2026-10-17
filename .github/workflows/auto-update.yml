@@ -2,9 +2,8 @@ name: Auto Daily Rates & Fee Sync
 
 on:
   schedule:
-    # 每天 UTC 时间 02:00（北京时间 10:00）自动运行
+    # 每天 UTC 02:00（北京时间 10:00）定时运行
     - cron: '0 2 * * *'
-  # 允许在 GitHub 网页上手动点击按钮立即测试
   workflow_dispatch:
 
 jobs:
@@ -26,10 +25,10 @@ jobs:
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
-          git add index.html
+          git add index.html logs/
           if git diff --staged --quiet; then
             echo "No changes detected."
           else
-            git commit -m "chore(auto): daily exchange rates & fee baseline sync [skip ci]"
+            git commit -m "chore(auto): daily FX sync & logs rotation [skip ci]"
             git push
           fi
