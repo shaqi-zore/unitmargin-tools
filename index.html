@@ -77,7 +77,7 @@
           </div>
         </div>
 
-        <!-- Category Metric Selector (NEW) -->
+        <!-- Category Metric Selector -->
         <div class="md:col-span-4 bg-slate-900/90 border border-slate-750 p-2.5 rounded-xl space-y-1.5">
           <div class="flex justify-between items-center text-[11px] font-bold text-teal-400">
             <span>3. Product Category</span>
@@ -243,12 +243,12 @@
 
             <!-- Cost List -->
             <div class="pt-2 border-t border-slate-700/80 text-xs font-mono space-y-1 text-slate-400">
-              <div class="flex justify-between"><span>COGS (Procurement):</span><span id="valCogsForeign" class="text-slate-200">\$0.00</span></div>
-              <div class="flex justify-between"><span>Shipping & Logistics:</span><span id="valShippingTotal" class="text-slate-200">\$0.00</span></div>
-              <div class="flex justify-between"><span>Platform & Creator Fees:</span><span id="valFeeTotal" class="text-slate-200">\$0.00</span></div>
-              <div class="flex justify-between"><span>Paid Ads (CPA):</span><span id="valAdTotal" class="text-slate-200">\$0.00</span></div>
+              <div class="flex justify-between"><span>COGS (Procurement):</span><span id="valCogsForeign" class="text-slate-200">$0.00</span></div>
+              <div class="flex justify-between"><span>Shipping & Logistics:</span><span id="valShippingTotal" class="text-slate-200">$0.00</span></div>
+              <div class="flex justify-between"><span>Platform & Creator Fees:</span><span id="valFeeTotal" class="text-slate-200">$0.00</span></div>
+              <div class="flex justify-between"><span>Paid Ads (CPA):</span><span id="valAdTotal" class="text-slate-200">$0.00</span></div>
               <div class="flex justify-between pt-1 border-t border-slate-700 text-slate-200 font-bold">
-                <span>Total Cost / Order:</span><span id="valTotalCost" class="text-emerald-400">\$0.00</span>
+                <span>Total Cost / Order:</span><span id="valTotalCost" class="text-emerald-400">$0.00</span>
               </div>
             </div>
 
@@ -291,15 +291,15 @@
           </div>
           <div class="bg-slate-900 p-3 rounded-xl border border-slate-750">
             <span class="text-[11px] text-slate-400">Total Revenue</span>
-            <p id="batchTotalRevenue" class="text-xl font-black text-sky-400 mt-0.5">\$0.00</p>
+            <p id="batchTotalRevenue" class="text-xl font-black text-sky-400 mt-0.5">$0.00</p>
           </div>
           <div class="bg-slate-900 p-3 rounded-xl border border-slate-750">
             <span class="text-[11px] text-slate-400">Total Sourcing Cost</span>
-            <p id="batchTotalCogs" class="text-xl font-black text-amber-400 mt-0.5">\$0.00</p>
+            <p id="batchTotalCogs" class="text-xl font-black text-amber-400 mt-0.5">$0.00</p>
           </div>
           <div class="bg-slate-900 p-3 rounded-xl border border-slate-750">
             <span class="text-[11px] text-slate-400">Total Net Profit</span>
-            <p id="batchTotalNetProfit" class="text-xl font-black text-emerald-400 mt-0.5">\$0.00</p>
+            <p id="batchTotalNetProfit" class="text-xl font-black text-emerald-400 mt-0.5">$0.00</p>
           </div>
         </div>
 
@@ -309,9 +309,9 @@
               <tr>
                 <th class="py-3 px-2">SKU / Product</th>
                 <th class="py-3 px-2">Units</th>
-                <th class="py-3 px-2">Price (<span class="curr-sym">\$</span>)</th>
+                <th class="py-3 px-2">Price (<span class="curr-sym">$</span>)</th>
                 <th class="py-3 px-2">COGS (¥)</th>
-                <th class="py-3 px-2">Shipping (<span class="curr-sym">\$</span>)</th>
+                <th class="py-3 px-2">Shipping (<span class="curr-sym">$</span>)</th>
                 <th class="py-3 px-2">Creator %</th>
                 <th class="py-3 px-2">Net Profit</th>
                 <th class="py-3 px-2">Margin</th>
@@ -365,19 +365,18 @@
 
     const fxState = { rates: { USD: 7.25, EUR: 7.82, GBP: 9.15 } };
     
-    // Built-in benchmark fallback rules
     let rulesData = {
       platforms: {
         TTS: {
           regions: {
-            US: { symbol: '\$', vat_rate: 0, tariff_rate: 7.5, inbound_placement: 0, storage_fee: 0.25, return_rate: 5.0, default_fulfillment: 4.5, categories: { "Standard / General (常规通用类目)": 6.0, "New Seller Promo (新店特惠期)": 3.0, "Consumer Electronics (3C数码)": 5.0, "Fashion & Apparel (服饰箱包)": 6.0 } },
+            US: { symbol: '$', vat_rate: 0, tariff_rate: 7.5, inbound_placement: 0, storage_fee: 0.25, return_rate: 5.0, default_fulfillment: 4.5, categories: { "Standard / General (常规通用类目)": 6.0, "New Seller Promo (新店特惠期)": 3.0, "Consumer Electronics (3C数码)": 5.0, "Fashion & Apparel (服饰箱包)": 6.0 } },
             EU: { symbol: '€', vat_rate: 19, tariff_rate: 4.5, inbound_placement: 0, storage_fee: 0.3, return_rate: 4.0, default_fulfillment: 4.8, categories: { "Standard / General (常规通用类目)": 6.0, "Consumer Electronics (3C数码)": 5.0 } },
             UK: { symbol: '£', vat_rate: 20, tariff_rate: 4.0, inbound_placement: 0, storage_fee: 0.25, return_rate: 4.0, default_fulfillment: 3.6, categories: { "Standard / General (英区常规通用)": 5.0, "New Seller Promo (新手扶持期)": 2.5 } }
           }
         },
         AMZ: {
           regions: {
-            US: { symbol: '\$', vat_rate: 0, tariff_rate: 7.5, inbound_placement: 0.34, storage_fee: 0.35, return_rate: 4.0, default_fulfillment: 5.8, categories: { "Home & Kitchen (家居厨具)": 15.0, "Consumer Electronics (消费数码)": 8.0, "Automotive & Tools (汽配五金)": 12.0, "Clothing & Apparel (服饰大类)": 17.0, "General / Other (其它常规)": 15.0 } },
+            US: { symbol: '$', vat_rate: 0, tariff_rate: 7.5, inbound_placement: 0.34, storage_fee: 0.35, return_rate: 4.0, default_fulfillment: 5.8, categories: { "Home & Kitchen (家居厨具)": 15.0, "Consumer Electronics (消费数码)": 8.0, "Automotive & Tools (汽配五金)": 12.0, "Clothing & Apparel (服饰大类)": 17.0, "General / Other (其它常规)": 15.0 } },
             EU: { symbol: '€', vat_rate: 19, tariff_rate: 4.5, inbound_placement: 0, storage_fee: 0.4, return_rate: 4.0, default_fulfillment: 5.2, categories: { "Home & Kitchen (家居厨具)": 15.0, "Consumer Electronics (消费电子)": 7.0, "General (常规通用)": 15.0 } },
             UK: { symbol: '£', vat_rate: 20, tariff_rate: 4.0, inbound_placement: 0, storage_fee: 0.35, return_rate: 4.0, default_fulfillment: 3.8, categories: { "Home & Kitchen (家居厨具)": 15.3, "Consumer Electronics (消费电子)": 7.14, "General (常规通用)": 15.3 } }
           }
@@ -393,7 +392,6 @@
       { name: "Trailer_D_Ring_Kit", units: 600, price: 29.99, cogsRmb: 32.0, shipping: 8.0, creatorComm: 0.0, adCpa: 6.5 }
     ];
 
-    // Try fetching the synced marketplace rules
     async function loadMarketplaceRules() {
       try {
         const res = await fetch('marketplace_rules.json');
@@ -430,6 +428,7 @@
       document.getElementById('txtCategoryFeeBadge').innerText = `Fee: ${fee}%`;
       document.getElementById('inpPlatformComm').value = fee;
       calculateSingle();
+      renderBatchTable();
     }
 
     document.getElementById('selCategory').addEventListener('change', syncCategoryFee);
@@ -457,7 +456,6 @@
       const rate = fxState.rates[curCode] || 7.25;
       document.getElementById('fxRateDisplay').innerText = `1 ${curCode} ≈ ${rate.toFixed(2)} CNY`;
 
-      // Sync platform preset rules
       document.getElementById('inpInbound').value = regConf.inbound_placement;
       document.getElementById('inpStorage').value = regConf.storage_fee;
       document.getElementById('inpTariff').value = regConf.tariff_rate;
@@ -469,7 +467,6 @@
       populateCategories();
     }
 
-    // Live FX from open exchange
     async function initFx() {
       try {
         const res = await fetch('https://open.er-api.com/v6/latest/CNY');
@@ -482,6 +479,7 @@
       } catch (e) {}
       await loadMarketplaceRules();
       updateSwitcherUI();
+      renderBatchTable();
     }
 
     function calculateSingle() {
@@ -536,7 +534,6 @@
       document.getElementById('valAdTotal').innerText = `${curSymbol}${adCpa.toFixed(2)}`;
       document.getElementById('valTotalCost').innerText = `${curSymbol}${totalCost.toFixed(2)}`;
 
-      // Verdict Box
       const vBox = document.getElementById('verdictBox');
       const vIcon = document.getElementById('verdictIcon');
       const vHeadline = document.getElementById('verdictHeadline');
@@ -562,7 +559,6 @@
         vDesc.innerHTML = `Healthy model! You pocket <strong class="text-emerald-300">${curSymbol}${netProfit.toFixed(2)}</strong> (${netMargin.toFixed(1)}%). Ads stay profitable if ROAS > <strong class="text-white">${breakevenRoas.toFixed(2)}x</strong>.`;
       }
 
-      // Cost Anatomy Breakdown
       const cogsShare = price > 0 ? ((cogsForeign + totalShipping) / price * 100).toFixed(1) : 0;
       const adShare = price > 0 ? (adCpa / price * 100).toFixed(1) : 0;
       const creatorShare = (creatorCommRate * 100).toFixed(1);
@@ -597,6 +593,162 @@
       calculateSingle();
     });
 
+    // Tab Navigation Switcher Events (FIXED)
+    document.getElementById('btnTabSingle').addEventListener('click', () => {
+      document.getElementById('viewSingle').classList.remove('hidden');
+      document.getElementById('viewBatch').classList.add('hidden');
+      document.getElementById('btnTabSingle').className = "px-3 py-1.5 rounded-lg text-xs font-bold bg-sky-600 text-white shadow transition-all";
+      document.getElementById('btnTabBatch').className = "px-3 py-1.5 rounded-lg text-xs font-bold text-slate-400 hover:text-white transition-all";
+    });
+
+    document.getElementById('btnTabBatch').addEventListener('click', () => {
+      document.getElementById('viewSingle').classList.add('hidden');
+      document.getElementById('viewBatch').classList.remove('hidden');
+      document.getElementById('btnTabBatch').className = "px-3 py-1.5 rounded-lg text-xs font-bold bg-sky-600 text-white shadow transition-all";
+      document.getElementById('btnTabSingle').className = "px-3 py-1.5 rounded-lg text-xs font-bold text-slate-400 hover:text-white transition-all";
+      renderBatchTable();
+    });
+
+    // Batch Matrix Table Render
+    function renderBatchTable() {
+      const regConf = rulesData.platforms[currentPlatform].regions[currentRegion];
+      const curSymbol = regConf.symbol;
+      const curCode = currentRegion === 'US' ? 'USD' : (currentRegion === 'EU' ? 'EUR' : 'GBP');
+      const rate = fxState.rates[curCode] || 7.25;
+
+      const tbody = document.getElementById('batchTableBody');
+      if (!tbody) return;
+      tbody.innerHTML = '';
+
+      let totalUnits = 0, totalRev = 0, totalCogs = 0, totalNet = 0;
+
+      batchProducts.forEach((p, idx) => {
+        const cogsForeign = p.cogsRmb / rate;
+        const platformComm = p.price * ((currentPlatform === 'TTS' ? 6.0 : 15.0) / 100);
+        const creatorComm = p.price * ((p.creatorComm || 0) / 100);
+        const landedCost = cogsForeign + (p.shipping || 0) + platformComm + creatorComm + (p.adCpa || 0);
+        const netProfit = p.price - landedCost;
+        const margin = p.price > 0 ? (netProfit / p.price) * 100 : 0;
+        const totalProfit = netProfit * p.units;
+
+        const preMarketingProfit = p.price - (cogsForeign + (p.shipping || 0) + platformComm);
+        const breakevenRoas = preMarketingProfit > 0 ? (p.price / preMarketingProfit) : 0;
+
+        totalUnits += p.units;
+        totalRev += p.price * p.units;
+        totalCogs += cogsForeign * p.units;
+        totalNet += totalProfit;
+
+        const tr = document.createElement('tr');
+        tr.className = "hover:bg-slate-800/60";
+        tr.innerHTML = `
+          <td class="py-2.5 px-2 font-medium text-white">${p.name}</td>
+          <td class="py-2.5 px-2">${p.units.toLocaleString()}</td>
+          <td class="py-2.5 px-2">${curSymbol}${p.price.toFixed(2)}</td>
+          <td class="py-2.5 px-2">¥${p.cogsRmb.toFixed(2)}</td>
+          <td class="py-2.5 px-2">${curSymbol}${(p.shipping || 0).toFixed(2)}</td>
+          <td class="py-2.5 px-2">${p.creatorComm}%</td>
+          <td class="py-2.5 px-2 font-bold ${netProfit >= 0 ? 'text-emerald-400' : 'text-rose-400'}">${curSymbol}${netProfit.toFixed(2)}</td>
+          <td class="py-2.5 px-2 ${margin >= 15 ? 'text-sky-400 font-bold' : 'text-slate-400'}">${margin.toFixed(1)}%</td>
+          <td class="py-2.5 px-2 text-amber-300 font-bold">${breakevenRoas > 0 ? breakevenRoas.toFixed(2) + 'x' : 'N/A'}</td>
+          <td class="py-2.5 px-2 font-bold ${totalProfit >= 0 ? 'text-emerald-400' : 'text-rose-400'}">${curSymbol}${totalProfit.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
+          <td class="py-2.5 px-2 text-center"><button onclick="deleteBatchItem(${idx})" class="text-rose-400 hover:text-rose-300 font-bold">✕</button></td>
+        `;
+        tbody.appendChild(tr);
+      });
+
+      document.getElementById('batchTotalUnits').innerText = totalUnits.toLocaleString();
+      document.getElementById('batchTotalRevenue').innerText = `${curSymbol}${totalRev.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
+      document.getElementById('batchTotalCogs').innerText = `${curSymbol}${totalCogs.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
+      const pSummary = document.getElementById('batchTotalNetProfit');
+      pSummary.innerText = `${curSymbol}${totalNet.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
+      pSummary.className = totalNet >= 0 ? 'text-xl font-black text-emerald-400 mt-0.5' : 'text-xl font-black text-rose-400 mt-0.5';
+      document.getElementById('batchCountText').innerText = `${batchProducts.length} Products Listed`;
+    }
+
+    function deleteBatchItem(index) {
+      batchProducts.splice(index, 1);
+      renderBatchTable();
+    }
+
+    document.getElementById('btnAddRow').addEventListener('click', () => {
+      batchProducts.push({
+        name: `SKU_${batchProducts.length + 1}`,
+        units: 500, price: 29.99, cogsRmb: 35.0, shipping: 6.5, creatorComm: 15.0, adCpa: 4.5
+      });
+      renderBatchTable();
+    });
+
+    // Excel Upload Handler
+    document.getElementById('btnTriggerUpload').addEventListener('click', () => document.getElementById('excelFileInput').click());
+    document.getElementById('excelFileInput').addEventListener('change', function(e) {
+      const file = e.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = function(evt) {
+        try {
+          const data = new Uint8Array(evt.target.result);
+          const workbook = XLSX.read(data, { type: 'array' });
+          const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+          const jsonData = XLSX.utils.sheet_to_json(firstSheet, { defval: 0 });
+          if (!jsonData || jsonData.length === 0) return alert('No data detected in Excel.');
+
+          batchProducts = jsonData.map((row, idx) => ({
+            name: row.SKU || row['品名'] || `SKU_${idx + 1}`,
+            units: parseFloat(row.Units || row['数量'] || 100),
+            price: parseFloat(row.Selling_Price || row['售价'] || 0),
+            cogsRmb: parseFloat(row.COGS_RMB || row['采购成本'] || 0),
+            shipping: parseFloat(row.Shipping || row.Total_Shipping || (parseFloat(row.First_Leg_Freight || 0) + parseFloat(row.Fulfillment_Fee || 0)) || 6.5),
+            creatorComm: parseFloat(row.Creator_Comm_Pct || row['达人佣金率'] || 15),
+            adCpa: parseFloat(row.Target_Ad_CPA || row['广告CPA'] || 5)
+          }));
+          renderBatchTable();
+          alert(`Successfully imported ${batchProducts.length} items!`);
+        } catch (err) { alert('Error reading Excel spreadsheet.'); }
+      };
+      reader.readAsArrayBuffer(file);
+    });
+
+    // Download Template
+    document.getElementById('btnDownloadTemplate').addEventListener('click', () => {
+      const templateData = [
+        { SKU: "Auto_Shaker_650ml", Units: 1000, Selling_Price: 34.99, COGS_RMB: 42.0, Shipping: 7.0, Creator_Comm_Pct: 15.0, Target_Ad_CPA: 5.0 },
+        { SKU: "Chiikawa_Squishy_Set", Units: 2500, Selling_Price: 19.99, COGS_RMB: 18.0, Shipping: 5.3, Creator_Comm_Pct: 20.0, Target_Ad_CPA: 3.5 },
+        { SKU: "Tactical_Lure_Bag_7in1", Units: 800, Selling_Price: 49.99, COGS_RMB: 68.0, Shipping: 9.3, Creator_Comm_Pct: 12.0, Target_Ad_CPA: 8.0 }
+      ];
+      const ws = XLSX.utils.json_to_sheet(templateData);
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, "Batch_Template");
+      XLSX.writeFile(wb, "UnitMargin_Batch_Template.xlsx");
+    });
+
+    // Export Excel
+    document.getElementById('btnExportCsv').addEventListener('click', () => {
+      const regConf = rulesData.platforms[currentPlatform].regions[currentRegion];
+      const curCode = currentRegion === 'US' ? 'USD' : (currentRegion === 'EU' ? 'EUR' : 'GBP');
+      const rate = fxState.rates[curCode] || 7.25;
+      const exportRows = batchProducts.map(p => {
+        const cogsForeign = p.cogsRmb / rate;
+        const platformComm = p.price * ((currentPlatform === 'TTS' ? 6.0 : 15.0) / 100);
+        const creatorComm = p.price * ((p.creatorComm || 0) / 100);
+        const landedCost = cogsForeign + (p.shipping || 0) + platformComm + creatorComm + (p.adCpa || 0);
+        const netProfit = p.price - landedCost;
+        const margin = p.price > 0 ? (netProfit / p.price) * 100 : 0;
+        const preMarketingProfit = p.price - (cogsForeign + (p.shipping || 0) + platformComm);
+        const breakevenRoas = preMarketingProfit > 0 ? (p.price / preMarketingProfit) : 0;
+        return {
+          SKU: p.name, Units: p.units, Price: p.price, CogsRMB: p.cogsRmb, CogsForeign: cogsForeign.toFixed(2),
+          NetProfitUnit: netProfit.toFixed(2), MarginPct: `${margin.toFixed(1)}%`, BreakevenROAS: breakevenRoas.toFixed(2) + 'x',
+          TotalNetProfit: (netProfit * p.units).toFixed(2)
+        };
+      });
+      const ws = XLSX.utils.json_to_sheet(exportRows);
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, "Profit_Report");
+      XLSX.writeFile(wb, `UnitMargin_${currentPlatform}_${currentRegion}.xlsx`);
+    });
+
+    // Switcher Click Events
     document.querySelectorAll('.btn-plat').forEach(btn => {
       btn.addEventListener('click', () => {
         currentPlatform = btn.getAttribute('data-val');
@@ -611,6 +763,7 @@
       });
     });
 
+    // Modal Events
     document.getElementById('btnOpenGuide').addEventListener('click', () => document.getElementById('modalGuide').classList.remove('hidden'));
     document.getElementById('btnCloseGuide').addEventListener('click', () => document.getElementById('modalGuide').classList.add('hidden'));
     document.getElementById('btnCloseGuideFooter').addEventListener('click', () => document.getElementById('modalGuide').classList.add('hidden'));
